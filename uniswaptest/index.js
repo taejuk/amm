@@ -1,6 +1,5 @@
 const Web3 = require("web3");
 const {
-  Position,
   Pool,
   FeeAmount,
   computePoolAddress,
@@ -12,6 +11,7 @@ const {
   priceToClosestTick,
   tickToPrice,
 } = require("@uniswap/v3-sdk/dist");
+const { Position } = require("@uniswap/v3-sdk");
 const { NonfungiblePositionManager } = require("@uniswap/v3-sdk");
 const {
   Token,
@@ -23,69 +23,39 @@ const {
   Fraction,
 } = require("@uniswap/sdk-core");
 
-const daimain = new Token(
-  1,
-  "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-  18,
-  "DAI",
-  "Dai Stablecoin"
-);
-
 const Tx = require("ethereumjs-tx").Transaction;
-const {
-  abi: NFPABI,
-} = require("@uniswap/v3-periphery/artifacts/contracts/NonfungiblePositionManager.sol/NonfungiblePositionManager.json");
-const MULTICALL2_ABI = require("./abis/multicall2.json");
-const ERC20_ABI = require("./abis/erc20.json");
-const ERC20_BYTES32_ABI = require("./abis/erc20_bytes32.json");
-const JSBI = require("jsbi");
 
+const JSBI = require("jsbi");
+const NONFUNGIBLE_POSITION_MANAGER_ADDRESSES =
+  "0xC36442b4a4522E871399CD717aBDD847Ab11FE88";
 const ONE = new Fraction(1, 1);
-const {
-  abi: poolABI,
-} = require("@uniswap/v3-core/artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json");
 const { parseUnits } = require("@ethersproject/units");
 const {
   abi: IUniswapV3PoolStateABI,
 } = require("@uniswap/v3-core/artifacts/contracts/interfaces/pool/IUniswapV3PoolState.sol/IUniswapV3PoolState.json");
 const { Route } = require("@uniswap/v3-sdk/dist/v3-sdk.cjs.development");
 const { BigNumber } = require("ethers");
-
-const NONFUNGIBLE_POSITION_MANAGER_ADDRESSES =
-  "0xC36442b4a4522E871399CD717aBDD847Ab11FE88";
-const MULTICALL2_ADDRESS = "0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696";
+const {
+  getMulticallContract,
+  getTokenContract,
+  getNFPContract,
+} = require("./contracts");
+const { DAI, ETH } = require("./tokens");
 
 const address = "0xB2eE48A4CDCDe4DeEA3D93057B9e4cDBc8b6E2B6";
 const privateKey = Buffer.from(
   "1967496fd5d6ca4edfa3033430de8e35325e7fadb702dfe88575ff3346b351fd",
   "hex"
 );
-
+// web3 instance:
 const web3 = new Web3(
-  "https://mainnet.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
+  "https://ropsten.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
 );
 
 const BN = web3.utils.BN;
 
 const slippage = new Percent(50, 10_000);
 const remove_slippage = new Percent(80, 10_000);
-const DAI = new Token(
-  3,
-  "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
-  18,
-  "DAI",
-  "Dai Stablecoin"
-);
-
-const multicallContract = new web3.eth.Contract(
-  MULTICALL2_ABI,
-  MULTICALL2_ADDRESS
-);
-
-const NFPcontract = new web3.eth.Contract(
-  NFPABI,
-  NONFUNGIBLE_POSITION_MANAGER_ADDRESSES
-);
 
 // 이건 내가 넣은 pool에 대한 position을 가져오는 거고
 async function getTotalPools() {
@@ -102,10 +72,12 @@ async function getTotalPools() {
 }
 
 async function getTokenIds() {
-  const totals = await NFPcontract.methods.balanceOf(address).call();
+  const NFPContract = getNFPContract(web3);
+  console.log;
+  const totals = await NFPContract.methods.balanceOf(address).call();
   let tokenIds = [];
   for (let i = 0; i < totals; i++) {
-    const tokenId = await NFPcontract.methods
+    const tokenId = await NFPContract.methods
       .tokenOfOwnerByIndex(address, i)
       .call();
     tokenIds = [...tokenIds, tokenId];
@@ -116,23 +88,6 @@ async function getTokenIds() {
 function parseAmount(value, token) {
   const typedValueParsed = parseUnits(value, token.decimals).toString();
   return CurrencyAmount.fromRawAmount(token, typedValueParsed);
-}
-
-async function getPoolContract(tokenA, tokenB, feeAmount) {
-  tokenA = tokenA.wrapped;
-  tokenB = tokenB.wrapped;
-  const [token0, token1] = tokenA.sortsBefore(tokenB)
-    ? [tokenA, tokenB]
-    : [tokenB, tokenA];
-  const poolAddress = computePoolAddress({
-    factoryAddress: FACTORY_ADDRESS,
-    tokenA: token0,
-    tokenB: token1,
-    fee: feeAmount,
-  });
-
-  const poolContract = new web3.eth.Contract(poolABI, poolAddress);
-  return poolContract;
 }
 
 async function usePool(tokenA, tokenB, feeAmount) {
@@ -184,20 +139,24 @@ function parseTick(baseToken, quoteToken, feeAmount, value) {
   } else if (JSBI.lessThanOrEqual(sqrtRatioX96, TickMath.MIN_SQRT_RATIO)) {
     tick = TickMath.MIN_TICK;
   } else {
-    // this function is agnostic to the base, will always return the correct tick
     tick = priceToClosestTick(price);
   }
 
   return nearestUsableTick(tick, TICK_SPACINGS[feeAmount]);
 }
 
-// 현재 tick을 기준으로 100tick씩 차이나게 만들기
-async function createPosition(token0, token1, fee) {
+async function createPosition(
+  token0,
+  token1,
+  fee,
+  lowerPrice,
+  upperPrice,
+  amount0
+) {
   const pool = await usePool(token0, token1, fee);
-  const tickLower = parseTick(token0, token1, fee, "0.003");
-  const tickUpper = parseTick(token0, token1, fee, "0.004");
-  const amount = parseAmount("10", token0);
-  console.log(amount.quotient);
+  const tickLower = parseTick(token0, token1, fee, lowerPrice);
+  const tickUpper = parseTick(token0, token1, fee, upperPrice);
+  const amount = parseAmount(amount0, token0);
   const position = Position.fromAmount0({
     pool,
     tickLower: tickLower,
@@ -209,6 +168,7 @@ async function createPosition(token0, token1, fee) {
 }
 
 async function getDeadline() {
+  const multicallContract = getMulticallContract(web3);
   let blockTimestamp = await multicallContract.methods
     .getCurrentBlockTimestamp()
     .call();
@@ -217,15 +177,32 @@ async function getDeadline() {
   return deadline;
 }
 
-async function addLiquidity() {
-  const position = await createPosition(DAI, WETH9[3], FeeAmount.MEDIUM);
-  /*
-  const blockTimestamp = await multicallContract.methods
-    .getCurrentBlockTimestamp()
-    .call();
-  const deadline = blockTimestamp + 1800;
+async function addLiquidity(
+  tokenA,
+  tokenB,
+  fee,
+  lowerPrice,
+  upperPrice,
+  amount
+) {
+  const position = await createPosition(
+    tokenA,
+    tokenB,
+    fee,
+    lowerPrice,
+    upperPrice,
+    amount
+  );
+  const deadline = await getDeadline();
 
-  const useNative = Ether.onChain(3);
+  const useNative =
+    tokenA == WETH9[3] || tokenB == WETH9[3]
+      ? Ether.onChain(3)
+      : tokenA.isNative
+      ? tokenA
+      : tokenB.isNative
+      ? tokenB
+      : undefined;
   const { calldata, value } = NonfungiblePositionManager.addCallParameters(
     position,
     {
@@ -236,7 +213,8 @@ async function addLiquidity() {
       createPool: false,
     }
   );
-  console.log(value);
+  const NONFUNGIBLE_POSITION_MANAGER_ADDRESSES =
+    "0xC36442b4a4522E871399CD717aBDD847Ab11FE88";
   const rawTx = await makeRawTx(
     address,
     NONFUNGIBLE_POSITION_MANAGER_ADDRESSES,
@@ -244,28 +222,28 @@ async function addLiquidity() {
     value
   );
   sendTx(rawTx);
-  */
 }
 
 async function makeRawTx(from, to, data, value) {
-  const block = await web3.eth.getBlock("latest");
-  //const gasLimit = block.gasLimit;
-  //const gasPrice = await web3.eth.getGasPrice();
-  const nonce = await web3.eth.getTransactionCount(from);
-  const gasLimit = await console.log(value);
-  const rawTx = {
-    from,
-    to,
-    data,
+  let gasPrice = await web3.eth.getGasPrice();
+
+  let gas = await web3.eth.estimateGas({
+    to: to,
+    data: data,
     value,
+  });
+  const nonce = await web3.eth.getTransactionCount(from);
+  const rawTx = {
+    from: from,
+    to: to,
+    data: data,
+    value: "0x00",
     nonce: "0x" + nonce.toString(16),
-    gasLimit: "0x" + gasLimit.toString(16),
-    //gasPrice: "0x" + gasPrice.toString(16),
+    gasLimit: "0x" + gas.toString(16),
+    gasPrice: "0x" + gasPrice.toString(16),
   };
-  console.log(rawTx);
   return rawTx;
 }
-
 async function sendTx(rawTx) {
   let tx = new Tx(rawTx, { chain: "ropsten" });
   tx.sign(privateKey);
@@ -273,7 +251,6 @@ async function sendTx(rawTx) {
   const result = await web3.eth.sendSignedTransaction(
     "0x" + serializedTx.toString("hex")
   );
-  console.log(result);
   return result;
 }
 
@@ -282,8 +259,6 @@ async function getCurrentPrice(baseToken, quoteToken, feeAmount) {
   const tickCurrent = pool.tickCurrent;
   return tickToPrice(baseToken, quoteToken, tickCurrent);
 }
-// upper: 위로 몇 틱 움직일 것인가
-// lower: 아래로 몇 틱 움직일 것인가
 async function getRangeByTicks(upper, lower, baseToken, quoteToken, feeAmount) {
   const pool = await usePool(baseToken, quoteToken, feeAmount);
   const tickCurrent = pool.tickCurrent;
@@ -307,12 +282,8 @@ function calculateSlippageAmount(value) {
   ];
 }
 
-function getTokenContract(tokenAddress) {
-  return new web3.eth.Contract(ERC20_ABI, tokenAddress);
-}
-
 async function useToken(tokenAddress) {
-  const tokenContract = getTokenContract(tokenAddress);
+  const tokenContract = getTokenContract(tokenAddress, web3);
   const tokenName = await tokenContract.methods.name().call();
   const symbol = await tokenContract.methods.symbol().call();
   const decimals = await tokenContract.methods.decimals().call();
@@ -323,6 +294,7 @@ async function useToken(tokenAddress) {
 const MAX_UINT128 = BigNumber.from(2).pow(128).sub(1);
 
 async function getPositionFees(pool, tokenId) {
+  const NFPcontract = await getNFPContract(web3);
   const owner = await NFPcontract.methods.ownerOf(tokenId).call();
 
   const tokenIdHexString = "0x" + tokenId.toString(16);
@@ -349,16 +321,14 @@ async function getPositionFees(pool, tokenId) {
 
   const feeValue0 = CurrencyAmount.fromRawAmount(pool.token0, feeAmount0);
   const feeValue1 = CurrencyAmount.fromRawAmount(Ether.onChain(3), feeAmount1);
-  console.log(feeValue0);
-  console.log(feeValue1);
   return [feeValue0, feeValue1];
 }
 
 async function derivedBurnInfo(position, tokenId) {
   const token0 = await useToken(position.token0);
   const token1 = await useToken(position.token1);
-
   const pool = await usePool(token0, token1, parseInt(position.fee));
+
   const positionSDK = new Position({
     pool,
     liquidity: position.liquidity.toString(),
@@ -373,14 +343,13 @@ async function derivedBurnInfo(position, tokenId) {
     positionSDK.amount1.quotient
   ).quotient;
   const liquidityValue0 = CurrencyAmount.fromRawAmount(
-    token0,
+    token0.wrapped,
     discountedAmount0
   );
   const liquidityValue1 = CurrencyAmount.fromRawAmount(
-    token1,
+    token1.wrapped,
     discountedAmount1
   );
-
   const [feeValue0, feeValue1] = await getPositionFees(pool, tokenId);
   const outOfRange =
     pool.tickCurrent < positionSDK.tickLower ||
@@ -397,7 +366,7 @@ async function derivedBurnInfo(position, tokenId) {
 }
 
 async function burnLiquidity(tokenId) {
-  // 첫번째 tokenId를 없애보자
+  const NFPcontract = getNFPContract(web3);
   const position = await NFPcontract.methods.positions(tokenId).call();
   const percent = 100;
   const {
@@ -426,11 +395,7 @@ async function burnLiquidity(tokenId) {
       },
     }
   );
-  console.log(deadline.toString());
-  //  console.log("slippages::", remove_slippage);
-  //  console.log(liquidityPercentage);
-  console.log("calldata:", calldata);
-  const rawTx = makeRawTx(
+  const rawTx = await makeRawTx(
     address,
     NONFUNGIBLE_POSITION_MANAGER_ADDRESSES,
     calldata,
@@ -438,39 +403,8 @@ async function burnLiquidity(tokenId) {
   );
   sendTx(rawTx);
 }
-// 0xac9650d80000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000002a000000000000000000000000000000000000000000000000000000000000000a40c49ccbe00000000000000000000000000000000000000000000000000000000000008ec000000000000000000000000000000000000000000000002ee6e31314c08785a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004910e49b1159c00000000000000000000000000000000000000000000000000000000610775c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f786500000000000000000000000000000000000000000000000000000000000008ec000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004449404b7c000000000000000000000000000000000000000000000000000491a40079d96e000000000000000000000000b2ee48a4cdcde4deea3d93057b9e4cdbc8b6e2b6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000064df2ab5bb000000000000000000000000ad6d458402f60fd3bd25163575031acdce07538d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b2ee48a4cdcde4deea3d93057b9e4cdbc8b6e2b600000000000000000000000000000000000000000000000000000000
-// 0xac9650d8000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000a40c49ccbe00000000000000000000000000000000000000000000000000000000000008ec000000000000000000000000000000000000000000000002ee6e31314c08785a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004910e49b1159c00000000000000000000000000000000000000000000000000000000610781db000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f786500000000000000000000000000000000000000000000000000000000000008ec000000000000000000000000b2ee48a4cdcde4deea3d93057b9e4cdbc8b6e2b600000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000
-// 0xac9650d80000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000160000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000002a000000000000000000000000000000000000000000000000000000000000000a40c49ccbe00000000000000000000000000000000000000000000000000000000000008ec000000000000000000000000000000000000000000000002ee6e31314c08785a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004910e49b1159c0000000000000000000000000000000000000000000000000000000061078bb8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084fc6f786500000000000000000000000000000000000000000000000000000000000008ec000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000ffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004449404b7c000000000000000000000000000000000000000000000000000491a40079d96e000000000000000000000000b2ee48a4cdcde4deea3d93057b9e4cdbc8b6e2b6000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000064df2ab5bb000000000000000000000000ad6d458402f60fd3bd25163575031acdce07538d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b2ee48a4cdcde4deea3d93057b9e4cdbc8b6e2b600000000000000000000000000000000000000000000000000000000
 async function main() {
-  // DAI = await useToken("0xaD6D458402F60fD3Bd25163575031ACDce07538D");
-  // addLiquidity();
-  // const tokenIds = await getTokenIds();
-  // burnLiquidity(tokenIds[1]);
-  // console.log(remove_slippage);
-  // console.dir(NFPcontract.methods);
-  // console.log();
-  const USDC = new Token(
-    1,
-    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    6,
-    "USDC",
-    "USD//C"
-  );
-
-  const poolContract = await getPoolContract(USDC, WETH9[1], FeeAmount.MEDIUM);
-  // const aa = await poolContract.methods.tickBitmap().call();
-  // const a = await poolContract.methods.ticks(-78465).call();
-  // console.log(a);
-  const a = await poolContract.methods.slot0().call();
-  // console.log(price);
-  // const tickSpacing = await poolContract.methods.tickSpacing().call();
-  const b = await poolContract.methods.ticks(190020).call();
-
-  console.log(b);
+  burnLiquidity("4707");
 }
 
 main();
-// 1627881577
-// 1627879763
-// 1627881995
-// 16278797631800
