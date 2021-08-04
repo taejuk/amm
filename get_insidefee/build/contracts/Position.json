@@ -1,0 +1,4380 @@
+{
+  "contractName": "Position",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"details\":\"Positions store additional state for tracking fees owed to the position\",\"kind\":\"dev\",\"methods\":{},\"title\":\"Position\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"Positions represent an owner address' liquidity between a lower and upper tick boundary\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/Position.sol\":\"Position\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/FixedPoint128.sol\":{\"keccak256\":\"0x2d1f4f73ae0d8f0a210b8d30084659b57c56ac8f2f96011fca36f00a6d417178\",\"license\":\"GPL-2.0-or-later\",\"urls\":[\"bzz-raw://2ba88933f16cd2df398e19c6ad227268f83c03081b70d243c97116d2ed9bc241\",\"dweb:/ipfs/QmTUGxdh8snzEM9VrTSS47StCg9VVWvvLJtJeNnMTFY4xb\"]},\"/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/FullMath.sol\":{\"keccak256\":\"0xe511530871deaef86692cea9adb6076d26d7b47fd4815ce51af52af981026057\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://bc5a6ae776be3e7dcbd23d49ffbc9d792fed0ddf4b111ebb64b9bb2133ec263e\",\"dweb:/ipfs/QmbAUtWqvipzEARQpFpkzYKBELy3qeW5WXnZxHFU84sxG7\"]},\"/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/LiquidityMath.sol\":{\"keccak256\":\"0xd53041349718d5bce4a89e87cd911879d41ba42ba3fab0614e5e8b742f352b88\",\"license\":\"GPL-2.0-or-later\",\"urls\":[\"bzz-raw://ea7529b99ab4fc1d3e6c5a31990fb688f0a2d6cc302c0419e0cf5a2d6c563781\",\"dweb:/ipfs/QmVaphRSNpfChHZKzutQ9WprwCo2WE1euvThRfHcwsnHhj\"]},\"/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/Position.sol\":{\"keccak256\":\"0x015598c15db05a199db50c4aec997e0eb347757efcb008306ff46baf87b9370e\",\"license\":\"BUSL-1.1\",\"urls\":[\"bzz-raw://b704e23af4b17d135b48e37fa477cd83450bc3f990b7898da9427519018af2fc\",\"dweb:/ipfs/QmbSezBmVjaVeoUZ4eZHUXzxRMWDtZDb9515GenMPaMzwk\"]}},\"version\":1}",
+  "bytecode": "0x60566023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212200b0b62866be52cc7c230f4e85e0bb80b5f53e0e0372325393de6fc4abb760c3064736f6c63430007060033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212200b0b62866be52cc7c230f4e85e0bb80b5f53e0e0372325393de6fc4abb760c3064736f6c63430007060033",
+  "immutableReferences": {},
+  "sourceMap": "350:3254:26:-:0;;;;;;;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "350:3254:26:-:0;;;;;;;;",
+  "source": "// SPDX-License-Identifier: BUSL-1.1\npragma solidity >=0.5.0;\n\nimport './FullMath.sol';\nimport './FixedPoint128.sol';\nimport './LiquidityMath.sol';\n\n/// @title Position\n/// @notice Positions represent an owner address' liquidity between a lower and upper tick boundary\n/// @dev Positions store additional state for tracking fees owed to the position\nlibrary Position {\n    // info stored for each user's position\n    struct Info {\n        // the amount of liquidity owned by this position\n        uint128 liquidity;\n        // fee growth per unit of liquidity as of the last update to liquidity or fees owed\n        uint256 feeGrowthInside0LastX128;\n        uint256 feeGrowthInside1LastX128;\n        // the fees owed to the position owner in token0/token1\n        uint128 tokensOwed0;\n        uint128 tokensOwed1;\n    }\n\n    /// @notice Returns the Info struct of a position, given an owner and position boundaries\n    /// @param self The mapping containing all user positions\n    /// @param owner The address of the position owner\n    /// @param tickLower The lower tick boundary of the position\n    /// @param tickUpper The upper tick boundary of the position\n    /// @return position The position info struct of the given owners' position\n    function get(\n        mapping(bytes32 => Info) storage self,\n        address owner,\n        int24 tickLower,\n        int24 tickUpper\n    ) internal view returns (Position.Info storage position) {\n        position = self[keccak256(abi.encodePacked(owner, tickLower, tickUpper))];\n    }\n\n    /// @notice Credits accumulated fees to a user's position\n    /// @param self The individual position to update\n    /// @param liquidityDelta The change in pool liquidity as a result of the position update\n    /// @param feeGrowthInside0X128 The all-time fee growth in token0, per unit of liquidity, inside the position's tick boundaries\n    /// @param feeGrowthInside1X128 The all-time fee growth in token1, per unit of liquidity, inside the position's tick boundaries\n    function update(\n        Info storage self,\n        int128 liquidityDelta,\n        uint256 feeGrowthInside0X128,\n        uint256 feeGrowthInside1X128\n    ) internal {\n        Info memory _self = self;\n\n        // liqudity 변화량\n        uint128 liquidityNext;\n        if (liquidityDelta == 0) {\n            require(_self.liquidity > 0, 'NP'); // disallow pokes for 0 liquidity positions\n            liquidityNext = _self.liquidity;\n        } else {\n            liquidityNext = LiquidityMath.addDelta(_self.liquidity, liquidityDelta);\n        }\n\n        // calculate accumulated fees\n        uint128 tokensOwed0 =\n            uint128(\n                FullMath.mulDiv(\n                    feeGrowthInside0X128 - _self.feeGrowthInside0LastX128,\n                    _self.liquidity,\n                    FixedPoint128.Q128\n                )\n            );\n        uint128 tokensOwed1 =\n            uint128(\n                FullMath.mulDiv(\n                    feeGrowthInside1X128 - _self.feeGrowthInside1LastX128,\n                    _self.liquidity,\n                    FixedPoint128.Q128\n                )\n            );\n\n        // update the position\n        if (liquidityDelta != 0) self.liquidity = liquidityNext;\n        self.feeGrowthInside0LastX128 = feeGrowthInside0X128;\n        self.feeGrowthInside1LastX128 = feeGrowthInside1X128;\n        if (tokensOwed0 > 0 || tokensOwed1 > 0) {\n            // overflow is acceptable, have to withdraw before you hit type(uint128).max fees\n            self.tokensOwed0 += tokensOwed0;\n            self.tokensOwed1 += tokensOwed1;\n        }\n    }\n}\n",
+  "sourcePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/Position.sol",
+  "ast": {
+    "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/Position.sol",
+    "exportedSymbols": {
+      "FixedPoint128": [
+        3951
+      ],
+      "FullMath": [
+        4134
+      ],
+      "LiquidityMath": [
+        4186
+      ],
+      "Position": [
+        5224
+      ]
+    },
+    "id": 5225,
+    "license": "BUSL-1.1",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 5053,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:24:26"
+      },
+      {
+        "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/FullMath.sol",
+        "file": "./FullMath.sol",
+        "id": 5054,
+        "nodeType": "ImportDirective",
+        "scope": 5225,
+        "sourceUnit": 4135,
+        "src": "63:24:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/FixedPoint128.sol",
+        "file": "./FixedPoint128.sol",
+        "id": 5055,
+        "nodeType": "ImportDirective",
+        "scope": 5225,
+        "sourceUnit": 3952,
+        "src": "88:29:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/LiquidityMath.sol",
+        "file": "./LiquidityMath.sol",
+        "id": 5056,
+        "nodeType": "ImportDirective",
+        "scope": 5225,
+        "sourceUnit": 4187,
+        "src": "118:29:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": {
+          "id": 5057,
+          "nodeType": "StructuredDocumentation",
+          "src": "149:201:26",
+          "text": "@title Position\n @notice Positions represent an owner address' liquidity between a lower and upper tick boundary\n @dev Positions store additional state for tracking fees owed to the position"
+        },
+        "fullyImplemented": true,
+        "id": 5224,
+        "linearizedBaseContracts": [
+          5224
+        ],
+        "name": "Position",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "Position.Info",
+            "id": 5068,
+            "members": [
+              {
+                "constant": false,
+                "id": 5059,
+                "mutability": "mutable",
+                "name": "liquidity",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "497:17:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint128",
+                  "typeString": "uint128"
+                },
+                "typeName": {
+                  "id": 5058,
+                  "name": "uint128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "497:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5061,
+                "mutability": "mutable",
+                "name": "feeGrowthInside0LastX128",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "616:32:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 5060,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "616:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5063,
+                "mutability": "mutable",
+                "name": "feeGrowthInside1LastX128",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "658:32:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 5062,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "658:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5065,
+                "mutability": "mutable",
+                "name": "tokensOwed0",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "764:19:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint128",
+                  "typeString": "uint128"
+                },
+                "typeName": {
+                  "id": 5064,
+                  "name": "uint128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "764:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5067,
+                "mutability": "mutable",
+                "name": "tokensOwed1",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "793:19:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint128",
+                  "typeString": "uint128"
+                },
+                "typeName": {
+                  "id": 5066,
+                  "name": "uint128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "793:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Info",
+            "nodeType": "StructDefinition",
+            "scope": 5224,
+            "src": "417:402:26",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 5097,
+              "nodeType": "Block",
+              "src": "1440:90:26",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 5095,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 5084,
+                      "name": "position",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5082,
+                      "src": "1450:8:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                        "typeString": "struct Position.Info storage pointer"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "baseExpression": {
+                        "id": 5085,
+                        "name": "self",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5073,
+                        "src": "1461:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Info_$5068_storage_$",
+                          "typeString": "mapping(bytes32 => struct Position.Info storage ref)"
+                        }
+                      },
+                      "id": 5094,
+                      "indexExpression": {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "id": 5089,
+                                "name": "owner",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5075,
+                                "src": "1493:5:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              },
+                              {
+                                "id": 5090,
+                                "name": "tickLower",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5077,
+                                "src": "1500:9:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                }
+                              },
+                              {
+                                "id": 5091,
+                                "name": "tickUpper",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5079,
+                                "src": "1511:9:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                },
+                                {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                },
+                                {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                }
+                              ],
+                              "expression": {
+                                "id": 5087,
+                                "name": "abi",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4294967295,
+                                "src": "1476:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_magic_abi",
+                                  "typeString": "abi"
+                                }
+                              },
+                              "id": 5088,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "encodePacked",
+                              "nodeType": "MemberAccess",
+                              "src": "1476:16:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                "typeString": "function () pure returns (bytes memory)"
+                              }
+                            },
+                            "id": 5092,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "1476:45:26",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          ],
+                          "id": 5086,
+                          "name": "keccak256",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4294967288,
+                          "src": "1466:9:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (bytes memory) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 5093,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1466:56:26",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "IndexAccess",
+                      "src": "1461:62:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_storage",
+                        "typeString": "struct Position.Info storage ref"
+                      }
+                    },
+                    "src": "1450:73:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info storage pointer"
+                    }
+                  },
+                  "id": 5096,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1450:73:26"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5069,
+              "nodeType": "StructuredDocumentation",
+              "src": "825:416:26",
+              "text": "@notice Returns the Info struct of a position, given an owner and position boundaries\n @param self The mapping containing all user positions\n @param owner The address of the position owner\n @param tickLower The lower tick boundary of the position\n @param tickUpper The upper tick boundary of the position\n @return position The position info struct of the given owners' position"
+            },
+            "id": 5098,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "get",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5080,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5073,
+                  "mutability": "mutable",
+                  "name": "self",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1268:37:26",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Info_$5068_storage_$",
+                    "typeString": "mapping(bytes32 => struct Position.Info)"
+                  },
+                  "typeName": {
+                    "id": 5072,
+                    "keyType": {
+                      "id": 5070,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1276:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "Mapping",
+                    "src": "1268:24:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Info_$5068_storage_$",
+                      "typeString": "mapping(bytes32 => struct Position.Info)"
+                    },
+                    "valueType": {
+                      "id": 5071,
+                      "name": "Info",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 5068,
+                      "src": "1287:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                        "typeString": "struct Position.Info"
+                      }
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5075,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1315:13:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5074,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1315:7:26",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5077,
+                  "mutability": "mutable",
+                  "name": "tickLower",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1338:15:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int24",
+                    "typeString": "int24"
+                  },
+                  "typeName": {
+                    "id": 5076,
+                    "name": "int24",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1338:5:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int24",
+                      "typeString": "int24"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5079,
+                  "mutability": "mutable",
+                  "name": "tickUpper",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1363:15:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int24",
+                    "typeString": "int24"
+                  },
+                  "typeName": {
+                    "id": 5078,
+                    "name": "int24",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1363:5:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int24",
+                      "typeString": "int24"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1258:126:26"
+            },
+            "returnParameters": {
+              "id": 5083,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5082,
+                  "mutability": "mutable",
+                  "name": "position",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1408:30:26",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                    "typeString": "struct Position.Info"
+                  },
+                  "typeName": {
+                    "id": 5081,
+                    "name": "Position.Info",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 5068,
+                    "src": "1408:13:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1407:32:26"
+            },
+            "scope": 5224,
+            "src": "1246:284:26",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 5222,
+              "nodeType": "Block",
+              "src": "2175:1427:26",
+              "statements": [
+                {
+                  "assignments": [
+                    5111
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5111,
+                      "mutability": "mutable",
+                      "name": "_self",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2185:17:26",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                        "typeString": "struct Position.Info"
+                      },
+                      "typeName": {
+                        "id": 5110,
+                        "name": "Info",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 5068,
+                        "src": "2185:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                          "typeString": "struct Position.Info"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5113,
+                  "initialValue": {
+                    "id": 5112,
+                    "name": "self",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 5101,
+                    "src": "2205:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info storage pointer"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2185:24:26"
+                },
+                {
+                  "assignments": [
+                    5115
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5115,
+                      "mutability": "mutable",
+                      "name": "liquidityNext",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2250:21:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "typeName": {
+                        "id": 5114,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2250:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5116,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2250:21:26"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_int128",
+                      "typeString": "int128"
+                    },
+                    "id": 5119,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5117,
+                      "name": "liquidityDelta",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5103,
+                      "src": "2285:14:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "==",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 5118,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2303:1:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "2285:19:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": {
+                    "id": 5143,
+                    "nodeType": "Block",
+                    "src": "2460:96:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5141,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5134,
+                            "name": "liquidityNext",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5115,
+                            "src": "2474:13:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "arguments": [
+                              {
+                                "expression": {
+                                  "id": 5137,
+                                  "name": "_self",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 5111,
+                                  "src": "2513:5:26",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                    "typeString": "struct Position.Info memory"
+                                  }
+                                },
+                                "id": 5138,
+                                "isConstant": false,
+                                "isLValue": true,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "memberName": "liquidity",
+                                "nodeType": "MemberAccess",
+                                "referencedDeclaration": 5059,
+                                "src": "2513:15:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint128",
+                                  "typeString": "uint128"
+                                }
+                              },
+                              {
+                                "id": 5139,
+                                "name": "liquidityDelta",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5103,
+                                "src": "2530:14:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_int128",
+                                  "typeString": "int128"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_uint128",
+                                  "typeString": "uint128"
+                                },
+                                {
+                                  "typeIdentifier": "t_int128",
+                                  "typeString": "int128"
+                                }
+                              ],
+                              "expression": {
+                                "id": 5135,
+                                "name": "LiquidityMath",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4186,
+                                "src": "2490:13:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_contract$_LiquidityMath_$4186_$",
+                                  "typeString": "type(library LiquidityMath)"
+                                }
+                              },
+                              "id": 5136,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "addDelta",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 4185,
+                              "src": "2490:22:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_internal_pure$_t_uint128_$_t_int128_$returns$_t_uint128_$",
+                                "typeString": "function (uint128,int128) pure returns (uint128)"
+                              }
+                            },
+                            "id": 5140,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "2490:55:26",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "2474:71:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5142,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2474:71:26"
+                      }
+                    ]
+                  },
+                  "id": 5144,
+                  "nodeType": "IfStatement",
+                  "src": "2281:275:26",
+                  "trueBody": {
+                    "id": 5133,
+                    "nodeType": "Block",
+                    "src": "2306:148:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "commonType": {
+                                "typeIdentifier": "t_uint128",
+                                "typeString": "uint128"
+                              },
+                              "id": 5124,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "leftExpression": {
+                                "expression": {
+                                  "id": 5121,
+                                  "name": "_self",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 5111,
+                                  "src": "2328:5:26",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                    "typeString": "struct Position.Info memory"
+                                  }
+                                },
+                                "id": 5122,
+                                "isConstant": false,
+                                "isLValue": true,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "memberName": "liquidity",
+                                "nodeType": "MemberAccess",
+                                "referencedDeclaration": 5059,
+                                "src": "2328:15:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint128",
+                                  "typeString": "uint128"
+                                }
+                              },
+                              "nodeType": "BinaryOperation",
+                              "operator": ">",
+                              "rightExpression": {
+                                "hexValue": "30",
+                                "id": 5123,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "kind": "number",
+                                "lValueRequested": false,
+                                "nodeType": "Literal",
+                                "src": "2346:1:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_rational_0_by_1",
+                                  "typeString": "int_const 0"
+                                },
+                                "value": "0"
+                              },
+                              "src": "2328:19:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bool",
+                                "typeString": "bool"
+                              }
+                            },
+                            {
+                              "hexValue": "4e50",
+                              "id": 5125,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "string",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "2349:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_stringliteral_ebb814de87c671cfe97a338672e9700a9288a1a6d16839e238618b2b7f2aa86d",
+                                "typeString": "literal_string \"NP\""
+                              },
+                              "value": "NP"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_bool",
+                                "typeString": "bool"
+                              },
+                              {
+                                "typeIdentifier": "t_stringliteral_ebb814de87c671cfe97a338672e9700a9288a1a6d16839e238618b2b7f2aa86d",
+                                "typeString": "literal_string \"NP\""
+                              }
+                            ],
+                            "id": 5120,
+                            "name": "require",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [
+                              4294967278,
+                              4294967278
+                            ],
+                            "referencedDeclaration": 4294967278,
+                            "src": "2320:7:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                              "typeString": "function (bool,string memory) pure"
+                            }
+                          },
+                          "id": 5126,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "2320:34:26",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$__$",
+                            "typeString": "tuple()"
+                          }
+                        },
+                        "id": 5127,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2320:34:26"
+                      },
+                      {
+                        "expression": {
+                          "id": 5131,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5128,
+                            "name": "liquidityNext",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5115,
+                            "src": "2412:13:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "expression": {
+                              "id": 5129,
+                              "name": "_self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5111,
+                              "src": "2428:5:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                "typeString": "struct Position.Info memory"
+                              }
+                            },
+                            "id": 5130,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "liquidity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5059,
+                            "src": "2428:15:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "2412:31:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5132,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2412:31:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "assignments": [
+                    5146
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5146,
+                      "mutability": "mutable",
+                      "name": "tokensOwed0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2604:19:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "typeName": {
+                        "id": 5145,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2604:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5161,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "commonType": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            "id": 5154,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "leftExpression": {
+                              "id": 5151,
+                              "name": "feeGrowthInside0X128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5105,
+                              "src": "2700:20:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "nodeType": "BinaryOperation",
+                            "operator": "-",
+                            "rightExpression": {
+                              "expression": {
+                                "id": 5152,
+                                "name": "_self",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5111,
+                                "src": "2723:5:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                  "typeString": "struct Position.Info memory"
+                                }
+                              },
+                              "id": 5153,
+                              "isConstant": false,
+                              "isLValue": true,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "feeGrowthInside0LastX128",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 5061,
+                              "src": "2723:30:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "src": "2700:53:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5155,
+                              "name": "_self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5111,
+                              "src": "2775:5:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                "typeString": "struct Position.Info memory"
+                              }
+                            },
+                            "id": 5156,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "liquidity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5059,
+                            "src": "2775:15:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5157,
+                              "name": "FixedPoint128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 3951,
+                              "src": "2812:13:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_FixedPoint128_$3951_$",
+                                "typeString": "type(library FixedPoint128)"
+                              }
+                            },
+                            "id": 5158,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "Q128",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3950,
+                            "src": "2812:18:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "id": 5149,
+                            "name": "FullMath",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4134,
+                            "src": "2663:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_FullMath_$4134_$",
+                              "typeString": "type(library FullMath)"
+                            }
+                          },
+                          "id": 5150,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "mulDiv",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 4090,
+                          "src": "2663:15:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
+                            "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
+                          }
+                        },
+                        "id": 5159,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2663:185:26",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 5148,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "2638:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint128_$",
+                        "typeString": "type(uint128)"
+                      },
+                      "typeName": {
+                        "id": 5147,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2638:7:26",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 5160,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2638:224:26",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint128",
+                      "typeString": "uint128"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2604:258:26"
+                },
+                {
+                  "assignments": [
+                    5163
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5163,
+                      "mutability": "mutable",
+                      "name": "tokensOwed1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2872:19:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "typeName": {
+                        "id": 5162,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2872:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5178,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "commonType": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            "id": 5171,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "leftExpression": {
+                              "id": 5168,
+                              "name": "feeGrowthInside1X128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5107,
+                              "src": "2968:20:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "nodeType": "BinaryOperation",
+                            "operator": "-",
+                            "rightExpression": {
+                              "expression": {
+                                "id": 5169,
+                                "name": "_self",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5111,
+                                "src": "2991:5:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                  "typeString": "struct Position.Info memory"
+                                }
+                              },
+                              "id": 5170,
+                              "isConstant": false,
+                              "isLValue": true,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "feeGrowthInside1LastX128",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 5063,
+                              "src": "2991:30:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "src": "2968:53:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5172,
+                              "name": "_self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5111,
+                              "src": "3043:5:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                "typeString": "struct Position.Info memory"
+                              }
+                            },
+                            "id": 5173,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "liquidity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5059,
+                            "src": "3043:15:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5174,
+                              "name": "FixedPoint128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 3951,
+                              "src": "3080:13:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_FixedPoint128_$3951_$",
+                                "typeString": "type(library FixedPoint128)"
+                              }
+                            },
+                            "id": 5175,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "Q128",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3950,
+                            "src": "3080:18:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "id": 5166,
+                            "name": "FullMath",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4134,
+                            "src": "2931:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_FullMath_$4134_$",
+                              "typeString": "type(library FullMath)"
+                            }
+                          },
+                          "id": 5167,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "mulDiv",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 4090,
+                          "src": "2931:15:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
+                            "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
+                          }
+                        },
+                        "id": 5176,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2931:185:26",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 5165,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "2906:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint128_$",
+                        "typeString": "type(uint128)"
+                      },
+                      "typeName": {
+                        "id": 5164,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2906:7:26",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 5177,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2906:224:26",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint128",
+                      "typeString": "uint128"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2872:258:26"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_int128",
+                      "typeString": "int128"
+                    },
+                    "id": 5181,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5179,
+                      "name": "liquidityDelta",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5103,
+                      "src": "3176:14:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 5180,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "3194:1:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "3176:19:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5188,
+                  "nodeType": "IfStatement",
+                  "src": "3172:55:26",
+                  "trueBody": {
+                    "expression": {
+                      "id": 5186,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftHandSide": {
+                        "expression": {
+                          "id": 5182,
+                          "name": "self",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 5101,
+                          "src": "3197:4:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                            "typeString": "struct Position.Info storage pointer"
+                          }
+                        },
+                        "id": 5184,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": true,
+                        "memberName": "liquidity",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 5059,
+                        "src": "3197:14:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "nodeType": "Assignment",
+                      "operator": "=",
+                      "rightHandSide": {
+                        "id": 5185,
+                        "name": "liquidityNext",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5115,
+                        "src": "3214:13:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "src": "3197:30:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      }
+                    },
+                    "id": 5187,
+                    "nodeType": "ExpressionStatement",
+                    "src": "3197:30:26"
+                  }
+                },
+                {
+                  "expression": {
+                    "id": 5193,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 5189,
+                        "name": "self",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5101,
+                        "src": "3237:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                          "typeString": "struct Position.Info storage pointer"
+                        }
+                      },
+                      "id": 5191,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "feeGrowthInside0LastX128",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5061,
+                      "src": "3237:29:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 5192,
+                      "name": "feeGrowthInside0X128",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5105,
+                      "src": "3269:20:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "3237:52:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 5194,
+                  "nodeType": "ExpressionStatement",
+                  "src": "3237:52:26"
+                },
+                {
+                  "expression": {
+                    "id": 5199,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 5195,
+                        "name": "self",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5101,
+                        "src": "3299:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                          "typeString": "struct Position.Info storage pointer"
+                        }
+                      },
+                      "id": 5197,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "feeGrowthInside1LastX128",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5063,
+                      "src": "3299:29:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 5198,
+                      "name": "feeGrowthInside1X128",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5107,
+                      "src": "3331:20:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "3299:52:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 5200,
+                  "nodeType": "ExpressionStatement",
+                  "src": "3299:52:26"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 5207,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "id": 5203,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "id": 5201,
+                        "name": "tokensOwed0",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5146,
+                        "src": "3365:11:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "hexValue": "30",
+                        "id": 5202,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "3379:1:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "3365:15:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "||",
+                    "rightExpression": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "id": 5206,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "id": 5204,
+                        "name": "tokensOwed1",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5163,
+                        "src": "3384:11:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "hexValue": "30",
+                        "id": 5205,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "3398:1:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "3384:15:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "src": "3365:34:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5221,
+                  "nodeType": "IfStatement",
+                  "src": "3361:235:26",
+                  "trueBody": {
+                    "id": 5220,
+                    "nodeType": "Block",
+                    "src": "3401:195:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5212,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "expression": {
+                              "id": 5208,
+                              "name": "self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5101,
+                              "src": "3509:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                                "typeString": "struct Position.Info storage pointer"
+                              }
+                            },
+                            "id": 5210,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": true,
+                            "memberName": "tokensOwed0",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5065,
+                            "src": "3509:16:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "+=",
+                          "rightHandSide": {
+                            "id": 5211,
+                            "name": "tokensOwed0",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5146,
+                            "src": "3529:11:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "3509:31:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5213,
+                        "nodeType": "ExpressionStatement",
+                        "src": "3509:31:26"
+                      },
+                      {
+                        "expression": {
+                          "id": 5218,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "expression": {
+                              "id": 5214,
+                              "name": "self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5101,
+                              "src": "3554:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                                "typeString": "struct Position.Info storage pointer"
+                              }
+                            },
+                            "id": 5216,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": true,
+                            "memberName": "tokensOwed1",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5067,
+                            "src": "3554:16:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "+=",
+                          "rightHandSide": {
+                            "id": 5217,
+                            "name": "tokensOwed1",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5163,
+                            "src": "3574:11:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "3554:31:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5219,
+                        "nodeType": "ExpressionStatement",
+                        "src": "3554:31:26"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5099,
+              "nodeType": "StructuredDocumentation",
+              "src": "1536:469:26",
+              "text": "@notice Credits accumulated fees to a user's position\n @param self The individual position to update\n @param liquidityDelta The change in pool liquidity as a result of the position update\n @param feeGrowthInside0X128 The all-time fee growth in token0, per unit of liquidity, inside the position's tick boundaries\n @param feeGrowthInside1X128 The all-time fee growth in token1, per unit of liquidity, inside the position's tick boundaries"
+            },
+            "id": 5223,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "update",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5108,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5101,
+                  "mutability": "mutable",
+                  "name": "self",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2035:17:26",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                    "typeString": "struct Position.Info"
+                  },
+                  "typeName": {
+                    "id": 5100,
+                    "name": "Info",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 5068,
+                    "src": "2035:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5103,
+                  "mutability": "mutable",
+                  "name": "liquidityDelta",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2062:21:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int128",
+                    "typeString": "int128"
+                  },
+                  "typeName": {
+                    "id": 5102,
+                    "name": "int128",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2062:6:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int128",
+                      "typeString": "int128"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5105,
+                  "mutability": "mutable",
+                  "name": "feeGrowthInside0X128",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2093:28:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5104,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2093:7:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5107,
+                  "mutability": "mutable",
+                  "name": "feeGrowthInside1X128",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2131:28:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5106,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2131:7:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2025:140:26"
+            },
+            "returnParameters": {
+              "id": 5109,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2175:0:26"
+            },
+            "scope": 5224,
+            "src": "2010:1592:26",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 5225,
+        "src": "350:3254:26"
+      }
+    ],
+    "src": "37:3568:26"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/Position.sol",
+    "exportedSymbols": {
+      "FixedPoint128": [
+        3951
+      ],
+      "FullMath": [
+        4134
+      ],
+      "LiquidityMath": [
+        4186
+      ],
+      "Position": [
+        5224
+      ]
+    },
+    "id": 5225,
+    "license": "BUSL-1.1",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 5053,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "37:24:26"
+      },
+      {
+        "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/FullMath.sol",
+        "file": "./FullMath.sol",
+        "id": 5054,
+        "nodeType": "ImportDirective",
+        "scope": 5225,
+        "sourceUnit": 4135,
+        "src": "63:24:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/FixedPoint128.sol",
+        "file": "./FixedPoint128.sol",
+        "id": 5055,
+        "nodeType": "ImportDirective",
+        "scope": 5225,
+        "sourceUnit": 3952,
+        "src": "88:29:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/admin/Desktop/amm/amm/get_insidefee/contracts/uniswap/libraries/LiquidityMath.sol",
+        "file": "./LiquidityMath.sol",
+        "id": 5056,
+        "nodeType": "ImportDirective",
+        "scope": 5225,
+        "sourceUnit": 4187,
+        "src": "118:29:26",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": {
+          "id": 5057,
+          "nodeType": "StructuredDocumentation",
+          "src": "149:201:26",
+          "text": "@title Position\n @notice Positions represent an owner address' liquidity between a lower and upper tick boundary\n @dev Positions store additional state for tracking fees owed to the position"
+        },
+        "fullyImplemented": true,
+        "id": 5224,
+        "linearizedBaseContracts": [
+          5224
+        ],
+        "name": "Position",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "Position.Info",
+            "id": 5068,
+            "members": [
+              {
+                "constant": false,
+                "id": 5059,
+                "mutability": "mutable",
+                "name": "liquidity",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "497:17:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint128",
+                  "typeString": "uint128"
+                },
+                "typeName": {
+                  "id": 5058,
+                  "name": "uint128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "497:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5061,
+                "mutability": "mutable",
+                "name": "feeGrowthInside0LastX128",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "616:32:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 5060,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "616:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5063,
+                "mutability": "mutable",
+                "name": "feeGrowthInside1LastX128",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "658:32:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 5062,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "658:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5065,
+                "mutability": "mutable",
+                "name": "tokensOwed0",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "764:19:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint128",
+                  "typeString": "uint128"
+                },
+                "typeName": {
+                  "id": 5064,
+                  "name": "uint128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "764:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 5067,
+                "mutability": "mutable",
+                "name": "tokensOwed1",
+                "nodeType": "VariableDeclaration",
+                "scope": 5068,
+                "src": "793:19:26",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint128",
+                  "typeString": "uint128"
+                },
+                "typeName": {
+                  "id": 5066,
+                  "name": "uint128",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "793:7:26",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint128",
+                    "typeString": "uint128"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Info",
+            "nodeType": "StructDefinition",
+            "scope": 5224,
+            "src": "417:402:26",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 5097,
+              "nodeType": "Block",
+              "src": "1440:90:26",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 5095,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 5084,
+                      "name": "position",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5082,
+                      "src": "1450:8:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                        "typeString": "struct Position.Info storage pointer"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "baseExpression": {
+                        "id": 5085,
+                        "name": "self",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5073,
+                        "src": "1461:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Info_$5068_storage_$",
+                          "typeString": "mapping(bytes32 => struct Position.Info storage ref)"
+                        }
+                      },
+                      "id": 5094,
+                      "indexExpression": {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "id": 5089,
+                                "name": "owner",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5075,
+                                "src": "1493:5:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                }
+                              },
+                              {
+                                "id": 5090,
+                                "name": "tickLower",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5077,
+                                "src": "1500:9:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                }
+                              },
+                              {
+                                "id": 5091,
+                                "name": "tickUpper",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5079,
+                                "src": "1511:9:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_address",
+                                  "typeString": "address"
+                                },
+                                {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                },
+                                {
+                                  "typeIdentifier": "t_int24",
+                                  "typeString": "int24"
+                                }
+                              ],
+                              "expression": {
+                                "id": 5087,
+                                "name": "abi",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4294967295,
+                                "src": "1476:3:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_magic_abi",
+                                  "typeString": "abi"
+                                }
+                              },
+                              "id": 5088,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "memberName": "encodePacked",
+                              "nodeType": "MemberAccess",
+                              "src": "1476:16:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                "typeString": "function () pure returns (bytes memory)"
+                              }
+                            },
+                            "id": 5092,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "1476:45:26",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_bytes_memory_ptr",
+                              "typeString": "bytes memory"
+                            }
+                          ],
+                          "id": 5086,
+                          "name": "keccak256",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4294967288,
+                          "src": "1466:9:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
+                            "typeString": "function (bytes memory) pure returns (bytes32)"
+                          }
+                        },
+                        "id": 5093,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "1466:56:26",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bytes32",
+                          "typeString": "bytes32"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "IndexAccess",
+                      "src": "1461:62:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_storage",
+                        "typeString": "struct Position.Info storage ref"
+                      }
+                    },
+                    "src": "1450:73:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info storage pointer"
+                    }
+                  },
+                  "id": 5096,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1450:73:26"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5069,
+              "nodeType": "StructuredDocumentation",
+              "src": "825:416:26",
+              "text": "@notice Returns the Info struct of a position, given an owner and position boundaries\n @param self The mapping containing all user positions\n @param owner The address of the position owner\n @param tickLower The lower tick boundary of the position\n @param tickUpper The upper tick boundary of the position\n @return position The position info struct of the given owners' position"
+            },
+            "id": 5098,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "get",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5080,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5073,
+                  "mutability": "mutable",
+                  "name": "self",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1268:37:26",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Info_$5068_storage_$",
+                    "typeString": "mapping(bytes32 => struct Position.Info)"
+                  },
+                  "typeName": {
+                    "id": 5072,
+                    "keyType": {
+                      "id": 5070,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1276:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "nodeType": "Mapping",
+                    "src": "1268:24:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_mapping$_t_bytes32_$_t_struct$_Info_$5068_storage_$",
+                      "typeString": "mapping(bytes32 => struct Position.Info)"
+                    },
+                    "valueType": {
+                      "id": 5071,
+                      "name": "Info",
+                      "nodeType": "UserDefinedTypeName",
+                      "referencedDeclaration": 5068,
+                      "src": "1287:4:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                        "typeString": "struct Position.Info"
+                      }
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5075,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1315:13:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 5074,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1315:7:26",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5077,
+                  "mutability": "mutable",
+                  "name": "tickLower",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1338:15:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int24",
+                    "typeString": "int24"
+                  },
+                  "typeName": {
+                    "id": 5076,
+                    "name": "int24",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1338:5:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int24",
+                      "typeString": "int24"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5079,
+                  "mutability": "mutable",
+                  "name": "tickUpper",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1363:15:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int24",
+                    "typeString": "int24"
+                  },
+                  "typeName": {
+                    "id": 5078,
+                    "name": "int24",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1363:5:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int24",
+                      "typeString": "int24"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1258:126:26"
+            },
+            "returnParameters": {
+              "id": 5083,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5082,
+                  "mutability": "mutable",
+                  "name": "position",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5098,
+                  "src": "1408:30:26",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                    "typeString": "struct Position.Info"
+                  },
+                  "typeName": {
+                    "id": 5081,
+                    "name": "Position.Info",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 5068,
+                    "src": "1408:13:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1407:32:26"
+            },
+            "scope": 5224,
+            "src": "1246:284:26",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 5222,
+              "nodeType": "Block",
+              "src": "2175:1427:26",
+              "statements": [
+                {
+                  "assignments": [
+                    5111
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5111,
+                      "mutability": "mutable",
+                      "name": "_self",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2185:17:26",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                        "typeString": "struct Position.Info"
+                      },
+                      "typeName": {
+                        "id": 5110,
+                        "name": "Info",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 5068,
+                        "src": "2185:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                          "typeString": "struct Position.Info"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5113,
+                  "initialValue": {
+                    "id": 5112,
+                    "name": "self",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 5101,
+                    "src": "2205:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info storage pointer"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2185:24:26"
+                },
+                {
+                  "assignments": [
+                    5115
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5115,
+                      "mutability": "mutable",
+                      "name": "liquidityNext",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2250:21:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "typeName": {
+                        "id": 5114,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2250:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5116,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2250:21:26"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_int128",
+                      "typeString": "int128"
+                    },
+                    "id": 5119,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5117,
+                      "name": "liquidityDelta",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5103,
+                      "src": "2285:14:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "==",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 5118,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "2303:1:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "2285:19:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": {
+                    "id": 5143,
+                    "nodeType": "Block",
+                    "src": "2460:96:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5141,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5134,
+                            "name": "liquidityNext",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5115,
+                            "src": "2474:13:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "arguments": [
+                              {
+                                "expression": {
+                                  "id": 5137,
+                                  "name": "_self",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 5111,
+                                  "src": "2513:5:26",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                    "typeString": "struct Position.Info memory"
+                                  }
+                                },
+                                "id": 5138,
+                                "isConstant": false,
+                                "isLValue": true,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "memberName": "liquidity",
+                                "nodeType": "MemberAccess",
+                                "referencedDeclaration": 5059,
+                                "src": "2513:15:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint128",
+                                  "typeString": "uint128"
+                                }
+                              },
+                              {
+                                "id": 5139,
+                                "name": "liquidityDelta",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5103,
+                                "src": "2530:14:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_int128",
+                                  "typeString": "int128"
+                                }
+                              }
+                            ],
+                            "expression": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_uint128",
+                                  "typeString": "uint128"
+                                },
+                                {
+                                  "typeIdentifier": "t_int128",
+                                  "typeString": "int128"
+                                }
+                              ],
+                              "expression": {
+                                "id": 5135,
+                                "name": "LiquidityMath",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 4186,
+                                "src": "2490:13:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_type$_t_contract$_LiquidityMath_$4186_$",
+                                  "typeString": "type(library LiquidityMath)"
+                                }
+                              },
+                              "id": 5136,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "addDelta",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 4185,
+                              "src": "2490:22:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_function_internal_pure$_t_uint128_$_t_int128_$returns$_t_uint128_$",
+                                "typeString": "function (uint128,int128) pure returns (uint128)"
+                              }
+                            },
+                            "id": 5140,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "kind": "functionCall",
+                            "lValueRequested": false,
+                            "names": [],
+                            "nodeType": "FunctionCall",
+                            "src": "2490:55:26",
+                            "tryCall": false,
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "2474:71:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5142,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2474:71:26"
+                      }
+                    ]
+                  },
+                  "id": 5144,
+                  "nodeType": "IfStatement",
+                  "src": "2281:275:26",
+                  "trueBody": {
+                    "id": 5133,
+                    "nodeType": "Block",
+                    "src": "2306:148:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "commonType": {
+                                "typeIdentifier": "t_uint128",
+                                "typeString": "uint128"
+                              },
+                              "id": 5124,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "leftExpression": {
+                                "expression": {
+                                  "id": 5121,
+                                  "name": "_self",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 5111,
+                                  "src": "2328:5:26",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                    "typeString": "struct Position.Info memory"
+                                  }
+                                },
+                                "id": 5122,
+                                "isConstant": false,
+                                "isLValue": true,
+                                "isPure": false,
+                                "lValueRequested": false,
+                                "memberName": "liquidity",
+                                "nodeType": "MemberAccess",
+                                "referencedDeclaration": 5059,
+                                "src": "2328:15:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint128",
+                                  "typeString": "uint128"
+                                }
+                              },
+                              "nodeType": "BinaryOperation",
+                              "operator": ">",
+                              "rightExpression": {
+                                "hexValue": "30",
+                                "id": 5123,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "kind": "number",
+                                "lValueRequested": false,
+                                "nodeType": "Literal",
+                                "src": "2346:1:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_rational_0_by_1",
+                                  "typeString": "int_const 0"
+                                },
+                                "value": "0"
+                              },
+                              "src": "2328:19:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bool",
+                                "typeString": "bool"
+                              }
+                            },
+                            {
+                              "hexValue": "4e50",
+                              "id": 5125,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "kind": "string",
+                              "lValueRequested": false,
+                              "nodeType": "Literal",
+                              "src": "2349:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_stringliteral_ebb814de87c671cfe97a338672e9700a9288a1a6d16839e238618b2b7f2aa86d",
+                                "typeString": "literal_string \"NP\""
+                              },
+                              "value": "NP"
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_bool",
+                                "typeString": "bool"
+                              },
+                              {
+                                "typeIdentifier": "t_stringliteral_ebb814de87c671cfe97a338672e9700a9288a1a6d16839e238618b2b7f2aa86d",
+                                "typeString": "literal_string \"NP\""
+                              }
+                            ],
+                            "id": 5120,
+                            "name": "require",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [
+                              4294967278,
+                              4294967278
+                            ],
+                            "referencedDeclaration": 4294967278,
+                            "src": "2320:7:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                              "typeString": "function (bool,string memory) pure"
+                            }
+                          },
+                          "id": 5126,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "2320:34:26",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_tuple$__$",
+                            "typeString": "tuple()"
+                          }
+                        },
+                        "id": 5127,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2320:34:26"
+                      },
+                      {
+                        "expression": {
+                          "id": 5131,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "id": 5128,
+                            "name": "liquidityNext",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5115,
+                            "src": "2412:13:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "expression": {
+                              "id": 5129,
+                              "name": "_self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5111,
+                              "src": "2428:5:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                "typeString": "struct Position.Info memory"
+                              }
+                            },
+                            "id": 5130,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "liquidity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5059,
+                            "src": "2428:15:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "2412:31:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5132,
+                        "nodeType": "ExpressionStatement",
+                        "src": "2412:31:26"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "assignments": [
+                    5146
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5146,
+                      "mutability": "mutable",
+                      "name": "tokensOwed0",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2604:19:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "typeName": {
+                        "id": 5145,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2604:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5161,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "commonType": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            "id": 5154,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "leftExpression": {
+                              "id": 5151,
+                              "name": "feeGrowthInside0X128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5105,
+                              "src": "2700:20:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "nodeType": "BinaryOperation",
+                            "operator": "-",
+                            "rightExpression": {
+                              "expression": {
+                                "id": 5152,
+                                "name": "_self",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5111,
+                                "src": "2723:5:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                  "typeString": "struct Position.Info memory"
+                                }
+                              },
+                              "id": 5153,
+                              "isConstant": false,
+                              "isLValue": true,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "feeGrowthInside0LastX128",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 5061,
+                              "src": "2723:30:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "src": "2700:53:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5155,
+                              "name": "_self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5111,
+                              "src": "2775:5:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                "typeString": "struct Position.Info memory"
+                              }
+                            },
+                            "id": 5156,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "liquidity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5059,
+                            "src": "2775:15:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5157,
+                              "name": "FixedPoint128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 3951,
+                              "src": "2812:13:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_FixedPoint128_$3951_$",
+                                "typeString": "type(library FixedPoint128)"
+                              }
+                            },
+                            "id": 5158,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "Q128",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3950,
+                            "src": "2812:18:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "id": 5149,
+                            "name": "FullMath",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4134,
+                            "src": "2663:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_FullMath_$4134_$",
+                              "typeString": "type(library FullMath)"
+                            }
+                          },
+                          "id": 5150,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "mulDiv",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 4090,
+                          "src": "2663:15:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
+                            "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
+                          }
+                        },
+                        "id": 5159,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2663:185:26",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 5148,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "2638:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint128_$",
+                        "typeString": "type(uint128)"
+                      },
+                      "typeName": {
+                        "id": 5147,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2638:7:26",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 5160,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2638:224:26",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint128",
+                      "typeString": "uint128"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2604:258:26"
+                },
+                {
+                  "assignments": [
+                    5163
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 5163,
+                      "mutability": "mutable",
+                      "name": "tokensOwed1",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 5222,
+                      "src": "2872:19:26",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "typeName": {
+                        "id": 5162,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2872:7:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 5178,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "commonType": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            "id": 5171,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "leftExpression": {
+                              "id": 5168,
+                              "name": "feeGrowthInside1X128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5107,
+                              "src": "2968:20:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "nodeType": "BinaryOperation",
+                            "operator": "-",
+                            "rightExpression": {
+                              "expression": {
+                                "id": 5169,
+                                "name": "_self",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 5111,
+                                "src": "2991:5:26",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                  "typeString": "struct Position.Info memory"
+                                }
+                              },
+                              "id": 5170,
+                              "isConstant": false,
+                              "isLValue": true,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "memberName": "feeGrowthInside1LastX128",
+                              "nodeType": "MemberAccess",
+                              "referencedDeclaration": 5063,
+                              "src": "2991:30:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              }
+                            },
+                            "src": "2968:53:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5172,
+                              "name": "_self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5111,
+                              "src": "3043:5:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_memory_ptr",
+                                "typeString": "struct Position.Info memory"
+                              }
+                            },
+                            "id": 5173,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "liquidity",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5059,
+                            "src": "3043:15:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          {
+                            "expression": {
+                              "id": 5174,
+                              "name": "FixedPoint128",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 3951,
+                              "src": "3080:13:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_contract$_FixedPoint128_$3951_$",
+                                "typeString": "type(library FixedPoint128)"
+                              }
+                            },
+                            "id": 5175,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "Q128",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 3950,
+                            "src": "3080:18:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            },
+                            {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            },
+                            {
+                              "typeIdentifier": "t_uint256",
+                              "typeString": "uint256"
+                            }
+                          ],
+                          "expression": {
+                            "id": 5166,
+                            "name": "FullMath",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 4134,
+                            "src": "2931:8:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_type$_t_contract$_FullMath_$4134_$",
+                              "typeString": "type(library FullMath)"
+                            }
+                          },
+                          "id": 5167,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "mulDiv",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 4090,
+                          "src": "2931:15:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$_t_uint256_$returns$_t_uint256_$",
+                            "typeString": "function (uint256,uint256,uint256) pure returns (uint256)"
+                          }
+                        },
+                        "id": 5176,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2931:185:26",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 5165,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "ElementaryTypeNameExpression",
+                      "src": "2906:7:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_type$_t_uint128_$",
+                        "typeString": "type(uint128)"
+                      },
+                      "typeName": {
+                        "id": 5164,
+                        "name": "uint128",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "2906:7:26",
+                        "typeDescriptions": {}
+                      }
+                    },
+                    "id": 5177,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "typeConversion",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2906:224:26",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint128",
+                      "typeString": "uint128"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "2872:258:26"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_int128",
+                      "typeString": "int128"
+                    },
+                    "id": 5181,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 5179,
+                      "name": "liquidityDelta",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5103,
+                      "src": "3176:14:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int128",
+                        "typeString": "int128"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "!=",
+                    "rightExpression": {
+                      "hexValue": "30",
+                      "id": 5180,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "3194:1:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "3176:19:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5188,
+                  "nodeType": "IfStatement",
+                  "src": "3172:55:26",
+                  "trueBody": {
+                    "expression": {
+                      "id": 5186,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftHandSide": {
+                        "expression": {
+                          "id": 5182,
+                          "name": "self",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 5101,
+                          "src": "3197:4:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                            "typeString": "struct Position.Info storage pointer"
+                          }
+                        },
+                        "id": 5184,
+                        "isConstant": false,
+                        "isLValue": true,
+                        "isPure": false,
+                        "lValueRequested": true,
+                        "memberName": "liquidity",
+                        "nodeType": "MemberAccess",
+                        "referencedDeclaration": 5059,
+                        "src": "3197:14:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "nodeType": "Assignment",
+                      "operator": "=",
+                      "rightHandSide": {
+                        "id": 5185,
+                        "name": "liquidityNext",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5115,
+                        "src": "3214:13:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "src": "3197:30:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      }
+                    },
+                    "id": 5187,
+                    "nodeType": "ExpressionStatement",
+                    "src": "3197:30:26"
+                  }
+                },
+                {
+                  "expression": {
+                    "id": 5193,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 5189,
+                        "name": "self",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5101,
+                        "src": "3237:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                          "typeString": "struct Position.Info storage pointer"
+                        }
+                      },
+                      "id": 5191,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "feeGrowthInside0LastX128",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5061,
+                      "src": "3237:29:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 5192,
+                      "name": "feeGrowthInside0X128",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5105,
+                      "src": "3269:20:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "3237:52:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 5194,
+                  "nodeType": "ExpressionStatement",
+                  "src": "3237:52:26"
+                },
+                {
+                  "expression": {
+                    "id": 5199,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 5195,
+                        "name": "self",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5101,
+                        "src": "3299:4:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                          "typeString": "struct Position.Info storage pointer"
+                        }
+                      },
+                      "id": 5197,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "feeGrowthInside1LastX128",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 5063,
+                      "src": "3299:29:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 5198,
+                      "name": "feeGrowthInside1X128",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 5107,
+                      "src": "3331:20:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "3299:52:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 5200,
+                  "nodeType": "ExpressionStatement",
+                  "src": "3299:52:26"
+                },
+                {
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "id": 5207,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "id": 5203,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "id": 5201,
+                        "name": "tokensOwed0",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5146,
+                        "src": "3365:11:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "hexValue": "30",
+                        "id": 5202,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "3379:1:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "3365:15:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "||",
+                    "rightExpression": {
+                      "commonType": {
+                        "typeIdentifier": "t_uint128",
+                        "typeString": "uint128"
+                      },
+                      "id": 5206,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "leftExpression": {
+                        "id": 5204,
+                        "name": "tokensOwed1",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 5163,
+                        "src": "3384:11:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint128",
+                          "typeString": "uint128"
+                        }
+                      },
+                      "nodeType": "BinaryOperation",
+                      "operator": ">",
+                      "rightExpression": {
+                        "hexValue": "30",
+                        "id": 5205,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "number",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "3398:1:26",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_rational_0_by_1",
+                          "typeString": "int_const 0"
+                        },
+                        "value": "0"
+                      },
+                      "src": "3384:15:26",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bool",
+                        "typeString": "bool"
+                      }
+                    },
+                    "src": "3365:34:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 5221,
+                  "nodeType": "IfStatement",
+                  "src": "3361:235:26",
+                  "trueBody": {
+                    "id": 5220,
+                    "nodeType": "Block",
+                    "src": "3401:195:26",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 5212,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "expression": {
+                              "id": 5208,
+                              "name": "self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5101,
+                              "src": "3509:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                                "typeString": "struct Position.Info storage pointer"
+                              }
+                            },
+                            "id": 5210,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": true,
+                            "memberName": "tokensOwed0",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5065,
+                            "src": "3509:16:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "+=",
+                          "rightHandSide": {
+                            "id": 5211,
+                            "name": "tokensOwed0",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5146,
+                            "src": "3529:11:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "3509:31:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5213,
+                        "nodeType": "ExpressionStatement",
+                        "src": "3509:31:26"
+                      },
+                      {
+                        "expression": {
+                          "id": 5218,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "expression": {
+                              "id": 5214,
+                              "name": "self",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 5101,
+                              "src": "3554:4:26",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                                "typeString": "struct Position.Info storage pointer"
+                              }
+                            },
+                            "id": 5216,
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": true,
+                            "memberName": "tokensOwed1",
+                            "nodeType": "MemberAccess",
+                            "referencedDeclaration": 5067,
+                            "src": "3554:16:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "+=",
+                          "rightHandSide": {
+                            "id": 5217,
+                            "name": "tokensOwed1",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 5163,
+                            "src": "3574:11:26",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_uint128",
+                              "typeString": "uint128"
+                            }
+                          },
+                          "src": "3554:31:26",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint128",
+                            "typeString": "uint128"
+                          }
+                        },
+                        "id": 5219,
+                        "nodeType": "ExpressionStatement",
+                        "src": "3554:31:26"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "documentation": {
+              "id": 5099,
+              "nodeType": "StructuredDocumentation",
+              "src": "1536:469:26",
+              "text": "@notice Credits accumulated fees to a user's position\n @param self The individual position to update\n @param liquidityDelta The change in pool liquidity as a result of the position update\n @param feeGrowthInside0X128 The all-time fee growth in token0, per unit of liquidity, inside the position's tick boundaries\n @param feeGrowthInside1X128 The all-time fee growth in token1, per unit of liquidity, inside the position's tick boundaries"
+            },
+            "id": 5223,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "update",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 5108,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 5101,
+                  "mutability": "mutable",
+                  "name": "self",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2035:17:26",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                    "typeString": "struct Position.Info"
+                  },
+                  "typeName": {
+                    "id": 5100,
+                    "name": "Info",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 5068,
+                    "src": "2035:4:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Info_$5068_storage_ptr",
+                      "typeString": "struct Position.Info"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5103,
+                  "mutability": "mutable",
+                  "name": "liquidityDelta",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2062:21:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_int128",
+                    "typeString": "int128"
+                  },
+                  "typeName": {
+                    "id": 5102,
+                    "name": "int128",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2062:6:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_int128",
+                      "typeString": "int128"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5105,
+                  "mutability": "mutable",
+                  "name": "feeGrowthInside0X128",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2093:28:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5104,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2093:7:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 5107,
+                  "mutability": "mutable",
+                  "name": "feeGrowthInside1X128",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 5223,
+                  "src": "2131:28:26",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 5106,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2131:7:26",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2025:140:26"
+            },
+            "returnParameters": {
+              "id": 5109,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2175:0:26"
+            },
+            "scope": 5224,
+            "src": "2010:1592:26",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 5225,
+        "src": "350:3254:26"
+      }
+    ],
+    "src": "37:3568:26"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.2.2-next.0",
+  "updatedAt": "2021-08-03T06:36:35.119Z",
+  "devdoc": {
+    "details": "Positions store additional state for tracking fees owed to the position",
+    "kind": "dev",
+    "methods": {},
+    "title": "Position",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "notice": "Positions represent an owner address' liquidity between a lower and upper tick boundary",
+    "version": 1
+  }
+}
