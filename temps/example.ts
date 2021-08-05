@@ -23,12 +23,12 @@ const ONE = JSBI.BigInt(1);
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
 const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2));
 
-export interface TickConstructorArgs {
+interface TickConstructorArgs {
   index: number;
   liquidityGross: BigintIsh;
   liquidityNet: BigintIsh;
-  fee0X: BigintIsh;
-  fee1X: BigintIsh;
+  fee0XGrowthInside: BigintIsh;
+  fee1XGrowthInside: BigintIsh;
 }
 
 function tickComparator(a: TickWithFee, b: TickWithFee) {
@@ -168,12 +168,12 @@ class TickWithFee extends Tick {
     index,
     liquidityGross,
     liquidityNet,
-    fee0X,
-    fee1X,
+    fee0XGrowthInside,
+    fee1XGrowthInside,
   }: TickConstructorArgs) {
     super({ index, liquidityGross, liquidityNet });
-    this.fee0XGrowthInside = JSBI.BigInt(fee0X);
-    this.fee1XGrowthInside = JSBI.BigInt(fee1X);
+    this.fee0XGrowthInside = JSBI.BigInt(fee0XGrowthInside);
+    this.fee1XGrowthInside = JSBI.BigInt(fee1XGrowthInside);
   }
 }
 
@@ -420,35 +420,204 @@ class PoolWithFee {
       tickCurrent: state.tick,
     };
   }
+  public async modifyPosition(
+    tickLower: number,
+    tickUpper: number,
+    liquidityDelta: number
+  ) {}
+  public async updatePosition(
+    tickLower: number,
+    tickUpper: number,
+    liquidityDelta: number
+  ) {}
+  public async addLiquidity(
+    tickLower: number,
+    tickUpper: number,
+    liquidityDelta: number
+  ) {}
 }
 
-async function getPastTicks(timestamp: string) {
-  const result = await axios.post(
+async function getPastPool() {
+  const poolResult = await axios.post(
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
     {
       query: `{
-                  tickDayDatas(
-                    first: 100
-                    orderBy: liquidityGross
-                    orderDirection: desc
-                    where: {
-                      date: 1626220800
-                      pool: “0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8”
-                    }
-                        
-                    ){
-                    liquidityGross
-                    tick{
-                      tickIdx
-                    }
-                    feeGrowthOutside0X128
-                    feeGrowthOutside1X128
-                    feesUSD
-                  }
-                }`,
+        poolDayDatas(
+          where: {
+            pool: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+            date: 1628121600
+          }
+          ){
+          liquidity
+          feeGrowthGlobal0X128
+          feeGrowthGlobal1X128
+          sqrtPrice
+          tick
+        }
+      }
+      `,
     }
   );
-  console.log(result);
+  const Pool = poolResult.data.data.poolDayDatas[0];
+  const pool: poolResult = {
+    feeGrowthGlobal0X128: Pool.feeGrowthGlobal0X128,
+    feeGrowthGlobal1X128: Pool.feeGrowthGlobal1X128,
+    liquidity: Pool.liquidity,
+    sqrtPrice: Pool.sqrtPrice,
+    tick: Pool.tick,
+  };
+  console.log(Pool);
+  const tickResult = await axios.post(
+    "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
+    {
+      query: `{
+        tickDayDatas(
+          first: 1000
+          orderBy: liquidityGross
+          orderDirection: desc
+          where: {
+            date: 1628121600
+            pool: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+          }
+          
+          ){
+          liquidityGross
+          liquidityNet
+          tick{
+            tickIdx
+          }
+          feeGrowthOutside0X128
+          feeGrowthOutside1X128
+        }
+      }`,
+    }
+  );
+  const result = tickResult.data.data.tickDayDatas;
+
+  let ticks: tickResult[] = result.map((value: any) => {
+    return {
+      ...value,
+      tick: value.tick.tickIdx,
+    };
+  });
+  // tick을 다 가져왔다고 가정하자 (연속적이라고 생각하자)
+
+  ticks = ticks.sort(function (a, b): number {
+    return a.tick < b.tick ? -1 : a.tick > b.tick ? 1 : 0;
+  });
+  const currentTick = pool.tick;
+  const tickFinal: TickConstructorArgs[] = ticks.map(function (
+    value,
+    idx,
+    array
+  ) {
+    if (idx === array.length - 1) {
+      return {
+        index: array[idx].tick,
+        liquidityGross: array[idx].liquidityGross,
+        liquidityNet: array[idx].liquidityNet,
+        fee0XGrowthInside: "0",
+        fee1XGrowthInside: "0",
+      };
+    }
+    const [AboveX0, AboveX1] = getTickAbove(
+      currentTick,
+      pool.feeGrowthGlobal0X128,
+      pool.feeGrowthGlobal1X128,
+      array[idx + 1]
+    );
+    const [BelowX0, BelowX1] = getTickBelow(
+      currentTick,
+      pool.feeGrowthGlobal0X128,
+      pool.feeGrowthGlobal1X128,
+      array[idx]
+    );
+    const outside0x: JSBI = JSBI.ADD(BelowX0, AboveX0);
+    const outside1x: JSBI = JSBI.ADD(BelowX1, AboveX1);
+    return {
+      index: array[idx].tick,
+      liquidityGross: array[idx].liquidityGross,
+      liquidityNet: array[idx].liquidityNet,
+      fee0XGrowthInside: JSBI.subtract(
+        JSBI.BigInt(pool.feeGrowthGlobal0X128),
+        outside0x
+      ),
+      fee1XGrowthInside: JSBI.subtract(
+        JSBI.BigInt(pool.feeGrowthGlobal1X128),
+        outside1x
+      ),
+    };
+  });
 }
 
-getPastTicks("1626220800");
+function getTickAbove(
+  current: number,
+  growth0XInside: BigintIsh,
+  growth1XInside: BigintIsh,
+  tick: tickResult
+): [JSBI, JSBI] {
+  // JSBI.BigInt로 바꿔야 한다.
+  let fee0XAbove: JSBI;
+  let fee1XAbove: JSBI;
+  const foX0 = JSBI.BigInt(tick.feeGrowthOutside0X128);
+  const foX1 = JSBI.BigInt(tick.feeGrowthOutside1X128);
+  const global0X: JSBI = JSBI.BigInt(growth0XInside);
+  const global1X = JSBI.BigInt(growth1XInside);
+  if (current >= tick.tick) {
+    fee0XAbove = JSBI.subtract(global0X, foX0);
+    fee1XAbove = JSBI.subtract(global1X, foX1);
+  } else {
+    fee0XAbove = foX0;
+    fee1XAbove = foX1;
+  }
+  return [fee0XAbove, fee1XAbove];
+}
+
+function getTickBelow(
+  current: number,
+  growth0XInside: BigintIsh,
+  growth1XInside: BigintIsh,
+  tick: tickResult
+): [JSBI, JSBI] {
+  // JSBI.BigInt로 바꿔야 한다.
+  let fee0XBelow: JSBI;
+  let fee1XBelow: JSBI;
+  const foX0 = JSBI.BigInt(tick.feeGrowthOutside0X128);
+  const foX1 = JSBI.BigInt(tick.feeGrowthOutside1X128);
+  const global0X: JSBI = JSBI.BigInt(growth0XInside);
+  const global1X: JSBI = JSBI.BigInt(growth1XInside);
+  if (current >= tick.tick) {
+    fee0XBelow = foX0;
+    fee1XBelow = foX1;
+  } else {
+    fee0XBelow = JSBI.subtract(global0X, foX0);
+    fee1XBelow = JSBI.subtract(global1X, foX1);
+  }
+  return [fee0XBelow, fee1XBelow];
+}
+
+interface TickConstructorArgs {
+  index: number;
+  liquidityGross: BigintIsh;
+  liquidityNet: BigintIsh;
+  fee0XGrowthInside: BigintIsh;
+  fee1XGrowthInside: BigintIsh;
+}
+
+interface tickResult {
+  feeGrowthOutside0X128: BigintIsh;
+  feeGrowthOutside1X128: BigintIsh;
+  liquidityGross: BigintIsh;
+  liquidityNet: BigintIsh;
+  tick: number;
+}
+
+interface poolResult {
+  feeGrowthGlobal0X128: BigintIsh;
+  feeGrowthGlobal1X128: BigintIsh;
+  liquidity: BigintIsh;
+  sqrtPrice: BigintIsh;
+  tick: number;
+}
+
+getPastPool();
