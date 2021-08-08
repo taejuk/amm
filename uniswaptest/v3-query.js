@@ -12,32 +12,27 @@ const graphQLClient = new GraphQLClient(endpoint, {
 
 const query = gql`
     {
-        tickDayDatas(
-            first:50
-            orderBy: date
-            where: {
-                pool: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-                # date_gte: 1622419200
-                # date_lte: 1622422800
-                tick: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8#161160"
-            }
-        )
+        pools(whrer: {
+            id: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+        })
         {
-            date
-            # tick{
-            #   tickIdx
-            #   id
-            # }
-            liquidityGross
-            liquidityNet
-            volumeToken0
-            volumeToken1
+            createdAtBlockNumber
+            liquidity
+            sqrtPrice
+            tick
+            feeGrowthGlobal0X128
+            feeGrowthGlobal1X128
+            ticks{
+                feeGrowthOutside0X128
+                feeGrowthOutside0X128
+            }
         }
     }
 `
 const wow = async () => {
     const data = await graphQLClient.request(query)
-    console.log(JSON.stringify(data, undefined, 2))
+    //console.log(JSON.stringify(data, undefined, 2))
+    console.log(data)
 }
 
 wow()
