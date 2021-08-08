@@ -2,6 +2,7 @@ import {
   FeeAmount,
   isSorted,
   LiquidityMath,
+  Pool,
   Tick,
   TickMath,
   TICK_SPACINGS,
@@ -18,7 +19,7 @@ import JSBI from "jsbi";
 const NEGATIVE_ONE = JSBI.BigInt(-1);
 const ZERO = JSBI.BigInt(0);
 const ONE = JSBI.BigInt(1);
-
+JSBI.BigInt();
 // used in liquidity amount math
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
 const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2));
@@ -161,9 +162,12 @@ class TickList {
   }
 }
 
-class TickWithFee extends Tick {
+class TickWithFee {
+  public index: number;
   public fee0XGrowthInside: JSBI;
   public fee1XGrowthInside: JSBI;
+  public liquidityGross: JSBI;
+  public liquidityNet: JSBI;
   constructor({
     index,
     liquidityGross,
@@ -171,7 +175,9 @@ class TickWithFee extends Tick {
     fee0XGrowthInside,
     fee1XGrowthInside,
   }: TickConstructorArgs) {
-    super({ index, liquidityGross, liquidityNet });
+    this.index = index;
+    this.liquidityGross = JSBI.BigInt(liquidityGross);
+    this.liquidityNet = JSBI.BigInt(liquidityNet);
     this.fee0XGrowthInside = JSBI.BigInt(fee0XGrowthInside);
     this.fee1XGrowthInside = JSBI.BigInt(fee1XGrowthInside);
   }
@@ -208,7 +214,16 @@ class TickListDataProvider {
       );
     }
   }
-
+  async updateLiquidity(tick: number, liquidity: JSBI, upper: boolean) {
+    const idx = TickList.binarySearch(this.ticks, tick);
+    this.ticks[idx].liquidityGross = JSBI.add(
+      this.ticks[idx].liquidityGross,
+      liquidity
+    );
+    this.ticks[idx].liquidityNet = upper
+      ? JSBI.subtract(this.ticks[idx].liquidityNet, liquidity)
+      : JSBI.add(this.ticks[idx].liquidityNet, liquidity);
+  }
   async nextInitializedTickWithinOneWord(
     tick: number,
     lte: boolean,
@@ -420,23 +435,25 @@ class PoolWithFee {
       tickCurrent: state.tick,
     };
   }
-  public async modifyPosition(
-    tickLower: number,
-    tickUpper: number,
-    liquidityDelta: number
-  ) {}
-  public async updatePosition(
-    tickLower: number,
-    tickUpper: number,
-    liquidityDelta: number
-  ) {}
   public async addLiquidity(
     tickLower: number,
     tickUpper: number,
     liquidityDelta: number
-  ) {}
+  ) {
+    this.tickDataProvider.updateLiquidity(
+      tickLower,
+      JSBI.BigInt(liquidityDelta),
+      false
+    );
+    this.tickDataProvider.updateLiquidity(
+      tickUpper,
+      JSBI.BigInt(liquidityDelta),
+      false
+    );
+  }
 }
-
+// 시작: 1627959600
+// 끝: 1627963200
 async function getPastPool() {
   const poolResult = await axios.post(
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
@@ -621,3 +638,57 @@ interface poolResult {
 }
 
 getPastPool();
+
+/*
+{
+  swaps(
+    first:10
+    where: {
+      pool: “0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8”
+    timestamp_gte: 1620586800
+      timestamp_lt:  1620589040
+    }
+  ){
+    token0{symbol}
+    token1{symbol}
+    tick
+    amount0
+    amount1
+    timestamp
+  }
+}
+*/
+
+/*
+{
+  mints(
+    where: {
+      pool: “0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8”
+   timestamp_gte: 1620586800
+      timestamp_lt:  1620589040
+    }
+  ){
+    token0{symbol}
+    token1{symbol}
+    amount0
+    amount1
+    timestamp
+    tickLower
+    tickUpper
+  }
+*/
+
+/*
+{
+ poolHourDatas(where: {
+   pool:"0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8",
+   periodStartUnix: 1627959600
+ }){
+   tick
+   liquidity
+   sqrtPrice
+   feeGrowthGlobal0X128
+   feeGrowthGlobal1X128
+ }
+}
+*/
