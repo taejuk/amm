@@ -1,8 +1,7 @@
-const { GraphQLClient } = require('graphql-request');
-const gql = require( 'graphql-tag' );
+import { GraphQLClient, gql } from 'graphql-request';
 
 
-const PoolData = gql`
+export const PoolData = gql`
 query pooldata($id: String){
     pools(
         where: {
@@ -16,9 +15,9 @@ query pooldata($id: String){
         createdAtTimestamp
     }
 }
-`
+`;
 
-const pastPoolData = (block) => gql`
+export const pastPoolData = (block) => gql`
 query getPoolAtBlock($id: String){
     pools(
         block: {number: ${block}}
@@ -33,9 +32,9 @@ query getPoolAtBlock($id: String){
         feeGrowthGlobal1X128
     }
 }
-`
+`;
 
-const pastPoolTicks = (block) => gql`
+export const pastPoolTicks = (block) => gql`
 query getTicksfromPool($id: String, $tick: BigInt){
     pools(
         block: {number: ${block}}
@@ -44,21 +43,43 @@ query getTicksfromPool($id: String, $tick: BigInt){
     })
     {
         ticks(
-            where: {tickIdx_gt: $tick}
+            where: {tickIdx_lt: $tick}
             orderBy: tickIdx
             first: 500
         ){
             tickIdx
+            liquidityNet
             liquidityGross
             feeGrowthOutside0X128
             feeGrowthOutside1X128
         }
     }
 }
-`
+`;
 
-module.exports = {
-    PoolData: PoolData,
-    pastPoolData: pastPoolData,
-    pastPoolTicks: pastPoolTicks,
-}
+export const pastPositionData = (block) => gql`
+    query positionsAtblock($id: String){
+        positions(
+        block: {number: ${block}}
+        where: {
+            pool_contains: $id
+        }
+        orderBy: id
+        first:50
+        ){
+        pool{
+            tick
+        }
+        id
+        tickLower{
+            tickIdx
+        }
+        tickUpper{
+            tickIdx
+        }
+        liquidity
+        feeGrowthInside0LastX128
+        feeGrowthInside1LastX128
+        }
+    }
+`;

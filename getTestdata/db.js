@@ -1,39 +1,74 @@
-var mongoose = require('mongoose');
-const uri = 'mongodb://localhost:27017/';
+import * as querys from './fetchdata.js';
+import mongoose from 'mongoose';
 
-function connectDb(dbname){
-    uri += `${dbname}`;
-    return mongoose.connect(uri);
+const Pools = mongoose.model('Schema', mongoose.Schema({
+    createdAtTimestamp: 'number',
+    poolId: {type: ['string'], index: true},
+    feeTier: 'number',
+    token0: 'string',
+    token1: 'string',
+}));
+
+
+async function wow(){
+  mongoose
+    .connect("mongodb://127.0.0.1:27017/unitest", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    });
+    
+    const db = mongoose.connection;
+
+    // 4. 연결 실패
+    db.on('error', function(){
+        console.log('Connection Failed!');
+    });
+    // 5. 연결 성공
+    db.once('open', function(data) {
+        console.log('Connected!', data);
+    });
+
+    querys.getPoolData(querys.id).then((data) => {
+        const pool = data.pools[0];
+        const pooldata = new Pools({
+            createdAtTimestamp: pool.createdAtTimestamp,
+            poolId: pool.id,
+            feeTier: pool.feeTier,
+            token0: pool.token0.symbol,
+            token1: pool.token1.symbol
+        });
+        console.log(pooldata);
+        //console.log(pool);
+
+        return pooldata;
+    }).then((data) =>{
+        data.save((err, data)=>{
+            if(err){
+                console.log(err);
+            } else{
+                console.log("save!");
+            }
+        })
+    });
+
+    Pools.find((err, pool)=>{
+        if(err){
+            console.log(err);
+        } else{
+            console.log(pool);
+        }
+    })
+    
+
+// 
+
+
+
+//         pooldata.save(function (err, ))
+//     }
+//   );
+
+
 }
-
-
-
-var db = mongoose.connection;
-
-db.on('error', function(){
-    console.log('Connection Failed!');
-});
-
-db.once('open', function() {
-    console.log('Connected!');
-});
-
-var student = mongoose.Schema({
-    name : 'string',
-    address : 'string',
-    age : 'number'
-});
-
-var Student = mongoose.model('Schema', student);
-
-// 8. Student 객체를 new 로 생성해서 값을 입력
-var newStudent = new Student({name:'Hong Gil Dong', address:'서울시 강남구 논현동', age:'22'});
-
-// 9. 데이터 저장
-newStudent.save(function(error, data){
-    if(error){
-        console.log(error);
-    }else{
-        console.log('Saved!')
-    }
-});
+wow()
