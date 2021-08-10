@@ -21,24 +21,6 @@ const poolQueryMaker = (blockNumber) => gql`
   }
 `;
 
-const tickQueryMaker = (blockNumber, tick) => gql`
-{
-    ticks(
-      where: {
-        pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-          tickIdx_gt: ${tick}
-      }
-      block: {number: ${blockNumber}}
-      orderBy: tickIdx
-      orderDirection: asc
-    ) {
-      tickIdx
-      feeGrowthOutside0X128
-      feeGrowthOutside1X128
-    }
-  }
-`;
-
 const findLowerTick = async (blockNumber) => {
   const tickData = await graphQLClient.request(`
     {
@@ -59,16 +41,6 @@ const findLowerTick = async (blockNumber) => {
   return Number(tickData.ticks[0].tickIdx);
 };
 
-const poolDataMaker = async (blockNumber) => {
-  const poolQuery = poolQueryMaker(blockNumber);
-  const poolData = await graphQLClient.request(poolQuery);
-  return {
-    feeGrowthGlobal0X128: poolData.pools[0].feeGrowthGlobal0X128,
-    feeGrowthGlobal1X128: poolData.pools[0].feeGrowthGlobal1X128,
-    tick: Number(poolData.pools[0].tick),
-  };
-};
-
 const tickDataMaker = async (blockNumber) => {
   const tickQuery = tickQueryMaker(blockNumber);
   const lowerTick = await findLowerTick(blockNumber);
@@ -78,6 +50,7 @@ const tickDataMaker = async (blockNumber) => {
   while (!finished) {
     const tickQuery = tickQueryMaker(blockNumber, startTick);
     const result = await graphQLClient.request(tickQuery);
+    console.log(result.ticks.length);
     if (result.ticks.length == 0) {
       finished = true;
     } else {
@@ -99,7 +72,11 @@ const tickDataMaker = async (blockNumber) => {
 
 const TickWithFeeDataMaker = async (blockNumber) => {
   const pool = await poolDataMaker(blockNumber);
-  const ticks = await tickDataMaker(blockNumber);
+  let ticks = await tickDataMaker(blockNumber);
+
+  ticks = ticks.sort((a, b) => {
+    return a.tickIdx > b.tickIdx ? 1 : 0;
+  });
   const ticksWithFee = ticks.map((tick, idx, ticks) => {
     if (idx === ticks.length - 1) {
       return {
@@ -114,7 +91,6 @@ const TickWithFeeDataMaker = async (blockNumber) => {
     let feeGrowthAbove0X128;
     let feeGrowthAbove1X128;
     if (parseInt(pool.tick) >= parseInt(tick.tickIdx)) {
-      console.log(pool.tick, tick.tickIdx);
       feeGrowthBelow0X128 = JSBI.BigInt(tick.feeGrowthOutside0X128);
       feeGrowthBelow1X128 = JSBI.BigInt(tick.feeGrowthOutside1X128);
     } else {
@@ -180,10 +156,9 @@ const calculateB = (currentTick, tick, global, outside) => {
 // 18806119136388047080789267109353
 
 const main = async () => {
-  const pool = await poolDataMaker(12974642);
-  const ticks = await TickWithFeeDataMaker(12974642);
+  const pool = await poolDataMaker(12987961);
+  const ticks = await TickWithFeeDataMaker(12987961);
   console.log(ticks);
-  console.log(pool);
 };
 main();
 

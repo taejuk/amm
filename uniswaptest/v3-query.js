@@ -1,6 +1,8 @@
 const { GraphQLClient, gql } = require("graphql-request");
 const JSBI = require("jsbi");
+const { convertTypeAcquisitionFromJson } = require("typescript");
 const endpoint = `https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3`;
+const fs = require("fs");
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
@@ -8,166 +10,147 @@ const graphQLClient = new GraphQLClient(endpoint, {
   },
 });
 
-const poolQueryMaker = (blockNumber) => gql`
-  {
-    pools(
-      where: { id: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8" }
-      block: { number: ${blockNumber} }
-    ) {
-      tick
-      feeGrowthGlobal0X128
-      feeGrowthGlobal1X128
-    }
-  }
-`;
-
-const tickQueryMaker = (blockNumber, tick) => gql`
+const positionQueryMaker = (blockNumber, id) => gql`
 {
-    ticks(
-      where: {
-        pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-          tickIdx_gt: ${tick}
-      }
-      block: {number: ${blockNumber}}
-      orderBy: tickIdx
-      orderDirection: asc
-    ) {
-      tickIdx
-      feeGrowthOutside0X128
-      feeGrowthOutside1X128
+  positions(
+    where: {
+      pool_contains:"0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+    	id_gt : "${id}"
     }
+    block: {
+      number: ${blockNumber}
+    }
+  	first: 1000
+    orderBy: id
+    orderDirection: asc
+  ){
+    feeGrowthInside0LastX128
+    feeGrowthInside1LastX128
+    tickLower {
+      tickIdx
+    }
+    tickUpper {
+      tickIdx
+    }
+    liquidity
   }
+}
 `;
 
-const findLowerTick = async (blockNumber) => {
-  const tickData = await graphQLClient.request(`
-    {
-      ticks(
-          first:1,
-          where: {
-          pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-          }
-          block: {number: ${blockNumber}}
-          orderBy: tickIdx
-          orderDirection: asc
-        ) {
-          tickIdx
-          feeGrowthOutside0X128
-          feeGrowthOutside1X128
-      }
-    }`);
-  return Number(tickData.ticks[0].tickIdx);
-};
-
-const poolDataMaker = async (blockNumber) => {
-  const poolQuery = poolQueryMaker(blockNumber);
-  const poolData = await graphQLClient.request(poolQuery);
-  return {
-    feeGrowthGlobal0X128: poolData.pools[0].feeGrowthGlobal0X128,
-    feeGrowthGlobal1X128: poolData.pools[0].feeGrowthGlobal1X128,
-    tick: Number(poolData.pools[0].tick),
-  };
-};
-
-const tickDataMaker = async (blockNumber) => {
-  const tickQuery = tickQueryMaker(blockNumber);
-  const lowerTick = await findLowerTick(blockNumber);
-  let startTick = lowerTick - 1;
+const positionDataMaker = async (blockNumber) => {
+  let length = 1;
+  let id = "-1";
+  let count = 0;
   let finished = false;
-  let ticks = [];
-  while (!finished) {
-    const tickQuery = tickQueryMaker(blockNumber, startTick);
-    const result = await graphQLClient.request(tickQuery);
-    if (result.ticks.length == 0) {
-      finished = true;
-    } else {
-      const tickResults = result.ticks.map((tick, idx, ticks) => {
-        if (idx == ticks.length - 1) {
-          startTick = Number(tick.tickIdx);
-        }
-        return {
-          feeGrowthOutside0X128: tick.feeGrowthOutside0X128,
-          feeGrowthOutside1X128: tick.feeGrowthOutside1X128,
-          tickIdx: Number(tick.tickIdx),
-        };
-      });
-      ticks = ticks.concat(tickResults);
+  let positions = [];
+  let tickSet = new Set([]);
+  while (length > 0) {
+    const positionQuery = positionQueryMaker(blockNumber, id);
+    const positionData = await graphQLClient.request(positionQuery);
+    length = positionData.positions.length;
+    if (length === 0) {
+      break;
     }
+    id = positionData.positions[length - 1].id;
+    count = count + length;
+    positions = [...positions, ...positionData.positions];
   }
+  positions.forEach((position) => {
+    tickSet.add(parseInt(position.tickLower.tickIdx));
+    tickSet.add(parseInt(position.tickUpper.tickIdx));
+  });
+
+  return { positions, tickSet };
+};
+
+const calculateFee = async (blockNumber) => {
+  const { positions, tickSet } = await positionDataMaker(blockNumber);
+};
+
+const calculate = (a, b) => {
+  return JSBI.ADD(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
+};
+
+const getTicksFromBlock = async (blockNumber) => {
+  const { positions, tickSet } = await positionDataMaker(blockNumber);
+  let ticks = {};
+  tickSet.forEach((tick) => {
+    ticks[tick] = {
+      liquidity: "0",
+      feeGrowthInside0LastX128: "0",
+      feeGrowthInside1LastX128: "0",
+    };
+  });
+  const orderedTicks = Object.keys(ticks).sort();
+  positions.forEach((position) => {
+    const {
+      feeGrowthInside0LastX128,
+      feeGrowthInside1LastX128,
+      liquidity,
+      tickLower: { tickIdx: lowerTick },
+      tickUpper: { tickIdx: upperTick },
+    } = position;
+    let startIdx;
+    let endIdx;
+    orderedTicks.forEach((tick, idx) => {
+      if (lowerTick == tick) {
+        startIdx = idx;
+      }
+      if (upperTick == tick) {
+        endIdx = idx;
+      }
+    });
+    for (let i = startIdx; i < endIdx + 1; i++) {
+      ticks[orderedTicks[i]].feeGrowthInside0LastX128 = calculate(
+        feeGrowthInside0LastX128,
+        ticks[orderedTicks[i]].feeGrowthInside0LastX128
+      );
+      ticks[orderedTicks[i]].feeGrowthInside1LastX128 = calculate(
+        feeGrowthInside1LastX128,
+        ticks[orderedTicks[i]].feeGrowthInside1LastX128
+      );
+      ticks[orderedTicks[i]].liquidity = calculate(
+        ticks[orderedTicks[i]].liquidity,
+        liquidity
+      );
+    }
+  });
   return ticks;
 };
 
-const TickWithFeeDataMaker = async (blockNumber) => {
-  const pool = await poolDataMaker(blockNumber);
-  const ticks = await tickDataMaker(blockNumber);
-  const ticksWithFee = ticks.map((tick, idx, ticks) => {
-    if (idx === ticks.length - 1) {
-      return {
-        ...tick,
-        feeGrowthInside0X128: "0",
-        feeGrowthInside1X128: "0",
+const calculateSub = (a, b) => {
+  return JSBI.subtract(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
+};
+
+const main = async () => {
+  const ticksBefore = await getTicksFromBlock(12986980);
+  const ticksAfter = await getTicksFromBlock(12990368);
+  let results = {};
+  const ticks = Object.keys(ticksAfter).sort();
+  let count = 0;
+  for (let tick of ticks) {
+    if (ticksBefore[tick] !== undefined) {
+      results[tick] = {
+        liquidity: ticksAfter[tick].liquidity,
+        feeGrowthInside0LastX128: calculateSub(
+          ticksAfter[tick].feeGrowthInside0LastX128,
+          ticksBefore[tick].feeGrowthInside0LastX128
+        ),
+        feeGrowthInside1LastX128: calculateSub(
+          ticksAfter[tick].feeGrowthInside1LastX128,
+          ticksBefore[tick].feeGrowthInside1LastX128
+        ),
       };
+    } else {
+      results[tick] = ticksAfter[tick];
     }
-    const nextTick = ticks[idx + 1];
-    const above0X = calculateAbove(
-      pool.tick,
-      nextTick.tickIdx,
-      pool.feeGrowthGlobal0X128,
-      nextTick.feeGrowthOutside0X128
-    );
-    const above1X = calculateAbove(
-      pool.tick,
-      nextTick.tickIdx,
-      pool.feeGrowthGlobal1X128,
-      nextTick.feeGrowthOutside1X128
-    );
-    const below0X = calculateBelow(
-      pool.tick,
-      tick.tickIdx,
-      pool.feeGrowthGlobal0X128,
-      tick.feeGrowthOutside0X128
-    );
-    const below1X = calculateBelow(
-      pool.tick,
-      tick.tickIdx,
-      pool.feeGrowthGlobal1X128,
-      tick.feeGrowthOutside1X128
-    );
-
-    // calculate fg - fa(tickUpper) - fb(tickLower)
-    const feeGrowthInside0X128 = JSBI.subtract(
-      JSBI.BigInt(pool.feeGrowthGlobal0X128),
-      JSBI.ADD(above0X, below0X)
-    ).toString();
-    const feeGrowthInside1X128 = JSBI.subtract(
-      JSBI.BigInt(pool.feeGrowthGlobal1X128),
-      JSBI.ADD(above1X, below1X)
-    ).toString();
-    return {
-      ...tick,
-      feeGrowthInside0X128,
-      feeGrowthInside1X128,
-    };
-  });
-  return ticksWithFee;
-};
-
-const calculateAbove = (currentTick, tick, global, outside) => {
-  if (currentTick >= tick) {
-    return JSBI.subtract(JSBI.BigInt(global), JSBI.BigInt(outside));
   }
-  return JSBI.BigInt(outside);
+  fs.writeFile(
+    "data1.txt",
+    JSON.stringify(results, undefined, 2),
+    function (error) {
+      console.log("error!", error);
+    }
+  );
 };
-
-const calculateBelow = (currentTick, tick, global, outside) => {
-  if (currentTick >= tick) {
-    return JSBI.BigInt(outside);
-  }
-  return JSBI.subtract(JSBI.BigInt(global), JSBI.BigInt(outside));
-};
-
-// tickDataMaker(12473624);
-// poolDataMaker(12473624);
-TickWithFeeDataMaker(12974642);
-
-// 16213700878322990241550871627801
+main();
