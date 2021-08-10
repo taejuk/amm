@@ -3,30 +3,31 @@ import JSBI from "jsbi";
 // usdc/eth pool 생성 시점: 1620169800
 // 100개씩 계속 부르면서 timestamp를 기록하면 된다.
 
-/*
-{
-  positionSnapshots(first:10, where: {
-    timestamp_gt:"1626311171"
-    pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-  }
-  orderBy: timestamp
-  orderDirection: asc
-  ){
-    id
-    timestamp
-    pool {
-      createdAtTimestamp
-      ticks {
-        tickIdx
-        feeGrowthOutside0X128
-        feeGrowthOutside1X128
-      }
-    }
-  }
+interface tick {
+  tickIdx: string;
+  feeGrowthOutside0X128: string;
+  feeGrowthOutside1X128: string;
 }
-*/
 
-function makequery(timestamp: string): string {
+interface tickWithFee {
+  tickIdx: string;
+  feeGrowthOutside0X128: string;
+  feeGrowthOutside1X128: string;
+  feeGrowthInside0X128: string;
+  feeGrowthInside1X128: string;
+}
+
+interface pool {
+  feeGrowthGlobal0X128: string;
+  feeGrowthGlobal1X128: string;
+  liquidity: string;
+  tick: string;
+}
+let ticks: { [timestamp: string]: tick[] } = {};
+let ticksWithFee: { [timestamp: string]: tickWithFee[] } = {};
+let ableTimestamps: string[] = [];
+
+function makeTimestampquery(timestamp: string): string {
   return (
     `{
         positionSnapshots(first:100, where: {
@@ -99,24 +100,6 @@ function makeTickquery(timestamp: string, tick: string): string {
       }`
   );
 }
-
-interface tick {
-  tickIdx: string;
-  feeGrowthOutside0X128: string;
-  feeGrowthOutside1X128: string;
-}
-
-interface tickWithFee {
-  tickIdx: string;
-  feeGrowthOutside0X128: string;
-  feeGrowthOutside1X128: string;
-  feeGrowthInside0X128: string;
-  feeGrowthInside1X128: string;
-}
-
-let ticks: { [timestamp: string]: tick[] } = {};
-let ticksWithFee: { [timestamp: string]: tickWithFee[] } = {};
-
 async function getTicksWithFee(timestamp: string) {
   const tickWithoutFee: tick[] = ticks[timestamp];
   const pool: pool = pools[timestamp];
@@ -207,7 +190,6 @@ function calculateAbove(
   );
 }
 
-let ableTimestamps: string[] = [];
 async function main() {
   let result;
   let initialTime = "1";
@@ -216,7 +198,7 @@ async function main() {
     result = await axios.post(
       "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
       {
-        query: makequery(initialTime),
+        query: makeTimestampquery(initialTime),
       }
     );
     if (result.data.data) {
@@ -237,12 +219,6 @@ async function main() {
   console.log(ableTimestamps);
 }
 
-interface pool {
-  feeGrowthGlobal0X128: string;
-  feeGrowthGlobal1X128: string;
-  liquidity: string;
-  tick: string;
-}
 let pools: { [timestamp: string]: pool } = {};
 async function getPool(timestamp: string) {
   const result = await axios.post(
@@ -258,10 +234,6 @@ async function getPool(timestamp: string) {
     liquidity: pool.liquidity,
     tick: pool.tick,
   };
-  /*
-  pools[timestamp] = pool;
-  console.log(pools[timestamp].feeGrowthGlobal0X128);
-  */
 }
 
 async function getTicks(timestamp: string) {
@@ -300,4 +272,3 @@ async function temp() {
   await getTicksWithFee("1628122970");
   console.log(ticksWithFee);
 }
-temp();
