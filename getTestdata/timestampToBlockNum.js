@@ -1,8 +1,11 @@
-const { GraphQLClient } = require('graphql-request');
-const gql = require( 'graphql-tag' );
-const dayjs = require('dayjs');
-var duration = require('dayjs/plugin/duration');
+import { GraphQLClient, gql } from 'graphql-request';
+import dayjs from 'dayjs';
+//var duration = require('dayjs/plugin/duration');
+
+import {duration, dayOfYear} from 'dayjs';
+//import duration from'dayjs/plugin/duration'
 dayjs.extend(duration);
+dayjs.extend(dayOfYear);
 //var Web3 = require("web3");
 
 const endpoint = `https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks`
@@ -20,6 +23,20 @@ const GET_BLOCKS = (timestamps) => {
     })
     queryString += '}'
     return gql(queryString)
+}
+//dayjs timestamp
+function makeDayTimestamps (day){
+    //onst dayduration = dayjs.duration(1, 'days');
+    const minuteduration = dayjs().minute(10).unix();
+    const endtime = day.add(1, 'd');
+    const timestamps = [];
+
+    console.log(day.unix(), " ", endtime.unix());
+    for(var i = day.unix(); i < endtime.unix()-1; i+= minuteduration){
+        timestamps.push(i);
+    }
+    console.log(timestamps.length);
+    return timestamps
 }
 
 async function makeTimestampList(starttime){
@@ -50,22 +67,20 @@ async function makeBlockNumList(timelist){
     return blockdata;
 }
 
-
-
-function useDeltaTimestamps(){
-    const utcCurrentTime = dayjs()
-    const t1 = utcCurrentTime.subtract(1, 'day').startOf('minute').unix()
-    const t2 = utcCurrentTime.subtract(2, 'day').startOf('minute').unix()
-    const tWeek = utcCurrentTime.subtract(1, 'week').startOf('minute').unix()
-    return [t1, t2, tWeek]
+async function makeBlockNum(timestamp){
+    const blockdata = await client.request(GET_BLOCKS([timestamp.unix()]));
+    console.log(blockdata);
 }
 
-const wow = async () => {
+const wow = () => {
     //const qurey = GET_BLOCKS([1628332322]);
     //console.log(qurey);
-    const data = await makeTimestampList(1628300000);
-    const blocknums = await makeBlockNumList(data);
-    Promise.all(blocknums).then((num) => console.log(num));
+    // const data = await makeTimestampList(1628300000);
+    // const blocknums = await makeBlockNumList(data);
+    // Promise.all(blocknums).then((num) => console.log(num));
+
+    console.log(makeDayTimestamps(dayjs('2020-01-01').dayOfYear()));
+
     //console.log(await blocknums);
     //console.log(data)
 }

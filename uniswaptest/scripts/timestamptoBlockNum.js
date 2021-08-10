@@ -1,5 +1,6 @@
 const { GraphQLClient } = require('graphql-request');
 const gql = require( 'graphql-tag' );
+const { dayjs } = require( 'dayjs' );
 
 const GET_BLOCKS = (timestamps) => {
     let queryString = 'query blocks {'

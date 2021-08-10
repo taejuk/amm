@@ -6,6 +6,7 @@ const endpoint = `https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3`
 
 const client = new GraphQLClient(endpoint)
 export const id = `0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8`
+const startblockd = "1620169800";
 
 export function getPoolData (id) {
     var data = client.request(
@@ -72,7 +73,6 @@ const main = async() => {
 
     //console.log(Object.keys(pastPositions.positions).length);
     //console.log(pastPositions.positions);
-
 
     const pastTicks = await getpastPoolTicks(id, 195799, blocknum);
     //console.log(typeof pastTicks.pools[0].ticks[0].tickIdx);

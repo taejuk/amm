@@ -13,6 +13,7 @@ query pooldata($id: String){
         token1{ symbol }
         feeTier
         createdAtTimestamp
+        createdAtBlockNumber
     }
 }
 `;
@@ -68,6 +69,13 @@ export const pastPositionData = (block) => gql`
         first:50
         ){
         pool{
+            token0{
+                symbol
+            }
+            token1{
+                symbol
+            }
+            id
             tick
         }
         id
