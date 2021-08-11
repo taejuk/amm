@@ -256,7 +256,7 @@ function findTickIdx(curTick: number, ticks: tickResult[]): number {
   return idx;
 }
 
-async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
+export async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
   let ticks = await getTicks(startBlockNumber);
   let pool = await getPool(startBlockNumber);
   var liquidity = JSBI.BigInt(pool.liquidity);
@@ -317,7 +317,7 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
             amounts,
             FeeAmount.MEDIUM
           );
-        console.log("amount in: ", amountIn.toString());
+        //console.log("amount in: ", amountIn.toString());
         sqrtPriceX96 = calsqrtPriceX96;
         // 토큰 양 업데이트
         amounts = JSBI.subtract(amounts, JSBI.add(amountIn, feeAmount));
@@ -364,15 +364,16 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
       };
     }
   });
-  fs.writeFile(
-    "hahas.txt",
-    JSON.stringify(resultss, undefined, 2),
-    function (error) {
-      if(error) console.log("error!", error);
-    }
-  );
+  return ticks;
+  // fs.writeFile(
+  //   "hahas.txt",
+  //   JSON.stringify(resultss, undefined, 2),
+  //   function (error) {
+  //     if(error) console.log("error!", error);
+  //   }
+  // );
 }
-calculateFees(12999114, 13002308);
+//calculateFees(12999114, 13002308);
 
 // getTicks(12994027);
 // getPool(12994027);
