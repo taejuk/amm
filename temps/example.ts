@@ -30,7 +30,27 @@ const Q128 = JSBI.BigInt("0x100000000000000000000000000000000");
 const web3 = new Web3(
   "https://mainnet.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
 );
+interface TickConstructorArgs {
+  index: number;
+  liquidityGross: BigintIsh;
+  liquidityNet: BigintIsh;
+  fee0XGrowthInside: BigintIsh;
+  fee1XGrowthInside: BigintIsh;
+}
 
+interface tickResult {
+  liquidityGross: BigintIsh;
+  liquidityNet: BigintIsh;
+  tick: number;
+  feeGrowthInside0X: BigintIsh;
+  feeGrowthInside1X: BigintIsh;
+}
+
+interface poolResult {
+  liquidity: BigintIsh;
+  sqrtPrice: BigintIsh;
+  tick: number;
+}
 async function getPool(blockNumber: number) {
   const poolResult = await axios.post(
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
@@ -220,16 +240,16 @@ function findNextTick(
     }
   });
   if (zeroForOne) {
-    return idx + 1;
-  } else {
     return curTick % 60 == 0 ? idx - 1 : idx;
+  } else {
+    return idx + 1;
   }
 }
 
 function findTickIdx(curTick: number, ticks: tickResult[]): number {
   let idx = -1;
   ticks.forEach((tick, index) => {
-    if (tick.tick == curTick) {
+    if (tick.tick == curTick - (curTick % 60)) {
       idx = index;
     }
   });
@@ -242,146 +262,155 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
   const events = await getEvents(startBlockNumber, endBlockNumber);
   for (let event of events) {
     if (event.type === "mint") {
-      ticks.forEach((tick) => {
+      let lowerIdx = -1;
+      let upperIdx = -1;
+      ticks.forEach((tick, idx) => {
         if (tick.tick == event.tickLower) {
-          tick.liquidityGross = add(tick.liquidityGross, event.amount);
-          tick.liquidityNet = add(tick.liquidityNet, event.amount);
+          lowerIdx = idx;
         }
         if (tick.tick == event.tickUpper) {
-          tick.liquidityGross = add(tick.liquidityGross, event.amount);
-          tick.liquidityNet = sub(tick.liquidityNet, event.amount);
+          upperIdx = idx;
         }
       });
+
+      if (lowerIdx == -1) {
+        const data: tickResult = {
+          tick: event.tickLower,
+          liquidityGross: "0",
+          liquidityNet: "0",
+          feeGrowthInside0X: "0",
+          feeGrowthInside1X: "0",
+        };
+        ticks.push(data);
+        ticks = ticks.sort((a: any, b: any) => {
+          return a.tick > b.tick ? 1 : -1;
+        });
+        ticks.forEach((tick, idx, array) => {
+          if (array[idx].tick == event.tickLower) {
+            array[idx].liquidityGross = array[idx - 1].liquidityGross;
+            lowerIdx = idx;
+          }
+        });
+      }
+      if (upperIdx == -1) {
+        const data: tickResult = {
+          tick: event.tickUpper,
+          liquidityGross: "0",
+          liquidityNet: "0",
+          feeGrowthInside0X: "0",
+          feeGrowthInside1X: "0",
+        };
+        ticks.push(data);
+        ticks = ticks.sort((a: any, b: any) => {
+          return a.tick > b.tick ? 1 : -1;
+        });
+        ticks.forEach((tick, idx, array) => {
+          if (array[idx].tick == event.tickUpper) {
+            array[idx].liquidityGross = array[idx - 1].liquidityGross;
+            upperIdx = idx;
+          }
+        });
+      }
+      for (let i = lowerIdx; i < upperIdx + 1; i++) {
+        ticks[i].liquidityGross = add(ticks[i].liquidityGross, event.amount);
+      }
     } else if (event.type === "burn") {
-      ticks.forEach((tick) => {
+      let lowerIdx = -1;
+      let upperIdx = -1;
+      ticks.forEach((tick, idx) => {
         if (tick.tick == event.tickLower) {
-          tick.liquidityGross = sub(tick.liquidityGross, event.amount);
-          tick.liquidityNet = sub(tick.liquidityNet, event.amount);
+          lowerIdx = idx;
         }
         if (tick.tick == event.tickUpper) {
-          tick.liquidityGross = sub(tick.liquidityGross, event.amount);
-          tick.liquidityNet = add(tick.liquidityNet, event.amount);
+          upperIdx = idx;
         }
       });
+      for (let i = lowerIdx; i < upperIdx + 1; i++) {
+        ticks[i].liquidityGross = sub(ticks[i].liquidityGross, event.amount);
+      }
     } else {
-      console.log("swap!");
-      let cacheLiquidity = JSBI.BigInt(pool.liquidity);
+      // swap 부분
       const zeroForOne = JSBI.greaterThan(
         JSBI.BigInt(event.amount0),
         JSBI.BigInt("0")
-      )
-        ? true
-        : false;
-
-      let state = {
-        amountSpecifiedRemaining: zeroForOne
-          ? JSBI.BigInt(event.amount0)
-          : JSBI.BigInt(event.amount1),
-        tick: pool.tick,
-        liquidity: cacheLiquidity,
-        sqrtPriceX96: JSBI.BigInt(pool.sqrtPrice),
-      };
-
-      while (
-        JSBI.greaterThan(state.amountSpecifiedRemaining, JSBI.BigInt("0"))
-      ) {
-        let step = {
-          sqrtPriceStartX96: JSBI.BigInt("0"),
-          tickNext: 0,
-          sqrtPriceNextX96: JSBI.BigInt("0"),
-          amountIn: JSBI.BigInt("0"),
-          amountOut: JSBI.BigInt("0"),
-          feeAmount: JSBI.BigInt("0"),
-        };
-        step.sqrtPriceStartX96 = state.sqrtPriceX96;
-        const nextTickIdx = findNextTick(state.tick, ticks, zeroForOne);
-
-        step.tickNext = ticks[nextTickIdx].tick;
-        step.sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(step.tickNext);
-        [state.sqrtPriceX96, step.amountIn, step.amountOut, step.feeAmount] =
+      );
+      let curTick = event.tick;
+      let sqrtPriceX96 = JSBI.BigInt(event.sqrtPriceX96);
+      let amounts = zeroForOne
+        ? JSBI.BigInt(event.amount0)
+        : JSBI.BigInt(event.amount1);
+      let curTickIdx = findTickIdx(curTick, ticks);
+      //console.log(event.amount0);
+      while (amounts.toString() !== "0") {
+        let liquidity = JSBI.BigInt(ticks[curTickIdx].liquidityGross);
+        let nextTickIdx = findNextTick(curTick, ticks, zeroForOne);
+        //  console.log(ticks[nextTickIdx].tick);
+        let sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(
+          ticks[nextTickIdx].tick
+        );
+        let [calsqrtPriceX96, amountIn, amountOut, feeAmount] =
           SwapMath.computeSwapStep(
-            state.sqrtPriceX96,
-            step.sqrtPriceNextX96,
-            state.liquidity,
-            state.amountSpecifiedRemaining,
+            sqrtPriceX96,
+            sqrtPriceNextX96,
+            liquidity,
+            amounts,
             FeeAmount.MEDIUM
           );
-        state.amountSpecifiedRemaining = JSBI.subtract(
-          state.amountSpecifiedRemaining,
-          JSBI.ADD(step.amountIn, step.feeAmount)
-        );
-        if (JSBI.greaterThan(state.liquidity, JSBI.BigInt("0"))) {
-          const curTickIdx = findTickIdx(state.tick, ticks);
-          const feeGrowthDelta = JSBI.divide(
-            JSBI.multiply(step.feeAmount, Q128),
-            state.liquidity
-          ).toString();
-          if (curTickIdx != -1) {
-            if (zeroForOne) {
-              ticks[curTickIdx].feeGrowthInside0X = add(
-                ticks[curTickIdx].feeGrowthInside0X,
-                feeGrowthDelta
-              );
-            } else {
-              ticks[curTickIdx].feeGrowthInside1X = add(
-                ticks[curTickIdx].feeGrowthInside1X,
-                feeGrowthDelta
-              );
-            }
-          }
-        }
-        if (JSBI.equal(state.sqrtPriceX96, step.sqrtPriceNextX96)) {
-          if (zeroForOne) {
-            state.liquidity = JSBI.subtract(
-              state.liquidity,
-              JSBI.BigInt(ticks[nextTickIdx].liquidityNet)
-            );
-          } else {
-            state.liquidity = JSBI.ADD(
-              state.liquidity,
-              JSBI.BigInt(ticks[nextTickIdx].liquidityNet)
-            );
+        console.log(amountIn.toString());
+        sqrtPriceX96 = calsqrtPriceX96;
+        // 토큰 양 업데이트
+        amounts = JSBI.subtract(amounts, JSBI.add(amountIn, feeAmount));
+        // 수수료 업데이트
+        if (zeroForOne) {
+          if (liquidity.toString() !== "0") {
+            ticks[curTickIdx].feeGrowthInside0X = JSBI.add(
+              JSBI.BigInt(ticks[curTickIdx].feeGrowthInside0X),
+              JSBI.divide(JSBI.multiply(feeAmount, Q128), liquidity)
+            ).toString();
           }
         } else {
-          state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX96);
+          if (liquidity.toString() !== "0") {
+            ticks[curTickIdx].feeGrowthInside1X = JSBI.add(
+              JSBI.BigInt(ticks[curTickIdx].feeGrowthInside1X),
+              JSBI.divide(JSBI.multiply(feeAmount, Q128), liquidity)
+            ).toString();
+          }
+        }
+        //
+        if (JSBI.equal(calsqrtPriceX96, sqrtPriceNextX96)) {
+          curTick = ticks[nextTickIdx].tick;
+          curTickIdx = nextTickIdx;
+        } else {
+          curTick = TickMath.getTickAtSqrtRatio(calsqrtPriceX96);
         }
       }
-      pool.liquidity = state.liquidity;
-      pool.sqrtPrice = state.sqrtPriceX96;
-      pool.tick = state.tick;
     }
   }
-  console.log(ticks);
+  type Result = {
+    liquidity: BigintIsh;
+    feeGrowthInside0X: BigintIsh;
+    feeGrowthInside1X: BigintIsh;
+  };
+  let resultss: { [id: string]: Result } = {};
+  ticks.forEach((tick) => {
+    let id = tick.tick.toString();
+
+    resultss[`${id}`] = {
+      liquidity: tick.liquidityGross,
+      feeGrowthInside0X: tick.feeGrowthInside0X,
+      feeGrowthInside1X: tick.feeGrowthInside1X,
+    };
+  });
   fs.writeFile(
     "hahas.txt",
-    JSON.stringify(ticks, undefined, 2),
+    JSON.stringify(resultss, undefined, 2),
     function (error) {
       console.log("error!", error);
     }
   );
 }
-calculateFees(12993010, 12994604);
-interface TickConstructorArgs {
-  index: number;
-  liquidityGross: BigintIsh;
-  liquidityNet: BigintIsh;
-  fee0XGrowthInside: BigintIsh;
-  fee1XGrowthInside: BigintIsh;
-}
+calculateFees(12999114, 13002308);
 
-interface tickResult {
-  liquidityGross: BigintIsh;
-  liquidityNet: BigintIsh;
-  tick: number;
-  feeGrowthInside0X: BigintIsh;
-  feeGrowthInside1X: BigintIsh;
-}
-
-interface poolResult {
-  liquidity: BigintIsh;
-  sqrtPrice: BigintIsh;
-  tick: number;
-}
 // getTicks(12994027);
 // getPool(12994027);
 // getEvents(12994010, 12994604);
