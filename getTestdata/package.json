@@ -1,0 +1,25 @@
+{
+  "name": "gettestdata",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "esModuleInterop": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "graphql-request": "^3.5.0",
+    "graphql-tag": "^2.12.5",
+    "i": "^0.3.6"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "dayjs": "^1.10.6",
+    "jsbi": "^3.1.6",
+    "mongodb": "^4.1.0",
+    "mongoose": "^5.13.5"
+  }
+}

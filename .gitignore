@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 uniswaptest/node_modules
+=======
+**/node_modules/
+uniswaptest/node_modules/
+getTestdata/node_modules/
+>>>>>>> e5e880c1a1a15747d4a2ff41780483949b904d90

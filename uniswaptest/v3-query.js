@@ -76,7 +76,6 @@ const positionDataMaker = async (blockNumber) => {
     tickSet.add(parseInt(position.tickLower.tickIdx));
     tickSet.add(parseInt(position.tickUpper.tickIdx));
   });
-
   return { positions, tickSet };
 };
 
