@@ -1,9 +1,11 @@
 import {
   FeeAmount,
+  FullMath,
   isSorted,
   LiquidityMath,
   Pool,
   Tick,
+  TickList,
   TickMath,
   TICK_SPACINGS,
 } from "@uniswap/v3-sdk";
@@ -15,604 +17,350 @@ import axios from "axios";
 import { SwapMath } from "./swapMath";
 
 import JSBI from "jsbi";
-
+import Web3 from "web3";
+import fs from "fs";
 const NEGATIVE_ONE = JSBI.BigInt(-1);
 const ZERO = JSBI.BigInt(0);
 const ONE = JSBI.BigInt(1);
-JSBI.BigInt();
+
 // used in liquidity amount math
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
 const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2));
+const Q128 = JSBI.BigInt("0x100000000000000000000000000000000");
+const web3 = new Web3(
+  "https://mainnet.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
+);
 
-interface TickConstructorArgs {
-  index: number;
-  liquidityGross: BigintIsh;
-  liquidityNet: BigintIsh;
-  fee0XGrowthInside: BigintIsh;
-  fee1XGrowthInside: BigintIsh;
-}
-
-function tickComparator(a: TickWithFee, b: TickWithFee) {
-  return a.index - b.index;
-}
-
-class TickList {
-  private constructor() {}
-
-  public static validateList(ticks: TickWithFee[], tickSpacing: number) {
-    invariant(tickSpacing > 0, "TICK_SPACING_NONZERO");
-    // ensure ticks are spaced appropriately
-    invariant(
-      ticks.every(({ index }) => index % tickSpacing === 0),
-      "TICK_SPACING"
-    );
-
-    // ensure tick liquidity deltas sum to 0
-    invariant(
-      JSBI.equal(
-        ticks.reduce(
-          (accumulator, { liquidityNet }) =>
-            JSBI.add(accumulator, liquidityNet),
-          ZERO
-        ),
-        ZERO
-      ),
-      "ZERO_NET"
-    );
-
-    invariant(isSorted(ticks, tickComparator), "SORTED");
-  }
-
-  public static isBelowSmallest(ticks: TickWithFee[], tick: number): boolean {
-    invariant(ticks.length > 0, "LENGTH");
-    return tick < ticks[0].index;
-  }
-
-  public static isAtOrAboveLargest(
-    ticks: TickWithFee[],
-    tick: number
-  ): boolean {
-    invariant(ticks.length > 0, "LENGTH");
-    return tick >= ticks[ticks.length - 1].index;
-  }
-
-  public static getTick(ticks: TickWithFee[], index: number): Tick {
-    const tick = ticks[this.binarySearch(ticks, index)];
-    invariant(tick.index === index, "NOT_CONTAINED");
-    return tick;
-  }
-
-  public static binarySearch(ticks: TickWithFee[], tick: number): number {
-    invariant(!this.isBelowSmallest(ticks, tick), "BELOW_SMALLEST");
-
-    let l = 0;
-    let r = ticks.length - 1;
-    let i;
-    while (true) {
-      i = Math.floor((l + r) / 2);
-
-      if (
-        ticks[i].index <= tick &&
-        (i === ticks.length - 1 || ticks[i + 1].index > tick)
-      ) {
-        return i;
-      }
-
-      if (ticks[i].index < tick) {
-        l = i + 1;
-      } else {
-        r = i - 1;
-      }
-    }
-  }
-
-  public static nextInitializedTick(
-    ticks: TickWithFee[],
-    tick: number,
-    lte: boolean
-  ): Tick {
-    if (lte) {
-      invariant(!TickList.isBelowSmallest(ticks, tick), "BELOW_SMALLEST");
-      if (TickList.isAtOrAboveLargest(ticks, tick)) {
-        return ticks[ticks.length - 1];
-      }
-      const index = this.binarySearch(ticks, tick);
-      return ticks[index];
-    } else {
-      invariant(!this.isAtOrAboveLargest(ticks, tick), "AT_OR_ABOVE_LARGEST");
-      if (this.isBelowSmallest(ticks, tick)) {
-        return ticks[0];
-      }
-      const index = this.binarySearch(ticks, tick);
-      return ticks[index + 1];
-    }
-  }
-
-  public static nextInitializedTickWithinOneWord(
-    ticks: TickWithFee[],
-    tick: number,
-    lte: boolean,
-    tickSpacing: number
-  ): [number, boolean] {
-    const compressed = Math.floor(tick / tickSpacing); // matches rounding in the code
-
-    if (lte) {
-      const wordPos = compressed >> 8;
-      const minimum = (wordPos << 8) * tickSpacing;
-
-      if (TickList.isBelowSmallest(ticks, tick)) {
-        return [minimum, false];
-      }
-
-      const index = TickList.nextInitializedTick(ticks, tick, lte).index;
-      const nextInitializedTick = Math.max(minimum, index);
-      return [nextInitializedTick, nextInitializedTick === index];
-    } else {
-      const wordPos = (compressed + 1) >> 8;
-      const maximum = ((wordPos + 1) << 8) * tickSpacing - 1;
-
-      if (this.isAtOrAboveLargest(ticks, tick)) {
-        return [maximum, false];
-      }
-
-      const index = this.nextInitializedTick(ticks, tick, lte).index;
-      const nextInitializedTick = Math.min(maximum, index);
-      return [nextInitializedTick, nextInitializedTick === index];
-    }
-  }
-}
-
-class TickWithFee {
-  public index: number;
-  public fee0XGrowthInside: JSBI;
-  public fee1XGrowthInside: JSBI;
-  public liquidityGross: JSBI;
-  public liquidityNet: JSBI;
-  constructor({
-    index,
-    liquidityGross,
-    liquidityNet,
-    fee0XGrowthInside,
-    fee1XGrowthInside,
-  }: TickConstructorArgs) {
-    this.index = index;
-    this.liquidityGross = JSBI.BigInt(liquidityGross);
-    this.liquidityNet = JSBI.BigInt(liquidityNet);
-    this.fee0XGrowthInside = JSBI.BigInt(fee0XGrowthInside);
-    this.fee1XGrowthInside = JSBI.BigInt(fee1XGrowthInside);
-  }
-}
-
-class TickListDataProvider {
-  public ticks: TickWithFee[];
-
-  constructor(ticks: TickWithFee[], tickSpacing: number) {
-    const ticksMapped: TickWithFee[] = ticks.map((t) =>
-      t instanceof TickWithFee ? t : new TickWithFee(t)
-    );
-    TickList.validateList(ticksMapped, tickSpacing);
-    this.ticks = ticksMapped;
-  }
-
-  async getTick(
-    tick: number
-  ): Promise<{ liquidityNet: BigintIsh; liquidityGross: BigintIsh }> {
-    return TickList.getTick(this.ticks, tick);
-  }
-
-  async addFee(tick: number, fee: JSBI, zeroForOne: boolean): Promise<void> {
-    const idx = TickList.binarySearch(this.ticks, tick);
-    if (zeroForOne) {
-      this.ticks[idx].fee0XGrowthInside = JSBI.ADD(
-        this.ticks[idx].fee0XGrowthInside,
-        fee
-      );
-    } else {
-      this.ticks[idx].fee1XGrowthInside = JSBI.ADD(
-        this.ticks[idx].fee1XGrowthInside,
-        fee
-      );
-    }
-  }
-  async updateLiquidity(tick: number, liquidity: JSBI, upper: boolean) {
-    const idx = TickList.binarySearch(this.ticks, tick);
-    this.ticks[idx].liquidityGross = JSBI.add(
-      this.ticks[idx].liquidityGross,
-      liquidity
-    );
-    this.ticks[idx].liquidityNet = upper
-      ? JSBI.subtract(this.ticks[idx].liquidityNet, liquidity)
-      : JSBI.add(this.ticks[idx].liquidityNet, liquidity);
-  }
-  async nextInitializedTickWithinOneWord(
-    tick: number,
-    lte: boolean,
-    tickSpacing: number
-  ): Promise<[number, boolean]> {
-    return TickList.nextInitializedTickWithinOneWord(
-      this.ticks,
-      tick,
-      lte,
-      tickSpacing
-    );
-  }
-}
-
-interface StepComputations {
-  sqrtPriceStartX96: JSBI;
-  tickNext: number;
-  initialized: boolean;
-  sqrtPriceNextX96: JSBI;
-  amountIn: JSBI;
-  amountOut: JSBI;
-  feeAmount: JSBI;
-}
-const ticks: TickWithFee[] = [];
-const tickSpacing = TICK_SPACINGS[3000];
-const TICK_DATA_PROVIDER = new TickListDataProvider(ticks, tickSpacing);
-
-class PoolWithFee {
-  public token0: Token;
-  public token1: Token;
-  public fee: FeeAmount;
-  public sqrtRatioX96: JSBI;
-  public liquidity: JSBI;
-  public tickCurrent: number;
-  public tickDataProvider: TickListDataProvider;
-  public tickSpacing: number;
-
-  public constructor(
-    tokenA: Token,
-    tokenB: Token,
-    fee: FeeAmount,
-    sqrtRatioX96: BigintIsh,
-    liquidity: BigintIsh,
-    tickCurrent: number,
-    ticks: TickListDataProvider
-  ) {
-    invariant(Number.isInteger(fee) && fee < 1_000_000, "FEE");
-    this.tickSpacing = TICK_SPACINGS[fee];
-    const tickCurrentSqrtRatioX96 = TickMath.getSqrtRatioAtTick(tickCurrent);
-    const nextTickSqrtRatioX96 = TickMath.getSqrtRatioAtTick(tickCurrent + 1);
-    invariant(
-      JSBI.greaterThanOrEqual(
-        JSBI.BigInt(sqrtRatioX96),
-        tickCurrentSqrtRatioX96
-      ) &&
-        JSBI.lessThanOrEqual(JSBI.BigInt(sqrtRatioX96), nextTickSqrtRatioX96),
-      "PRICE_BOUNDS"
-    );
-    // always create a copy of the list since we want the pool's tick list to be immutable
-    [this.token0, this.token1] = tokenA.sortsBefore(tokenB)
-      ? [tokenA, tokenB]
-      : [tokenB, tokenA];
-    this.fee = fee;
-    this.sqrtRatioX96 = JSBI.BigInt(sqrtRatioX96);
-    this.liquidity = JSBI.BigInt(liquidity);
-    this.tickCurrent = tickCurrent;
-    this.tickDataProvider = Array.isArray(ticks)
-      ? new TickListDataProvider(ticks, TICK_SPACINGS[fee])
-      : ticks;
-  }
-
-  public async swap(
-    zeroForOne: boolean,
-    amountSpecified: JSBI,
-    sqrtPriceLimitX96?: JSBI
-  ): Promise<{
-    amountCalculated: JSBI;
-    sqrtRatioX96: JSBI;
-    liquidity: JSBI;
-    tickCurrent: number;
-  }> {
-    if (!sqrtPriceLimitX96)
-      sqrtPriceLimitX96 = zeroForOne
-        ? JSBI.add(TickMath.MIN_SQRT_RATIO, ONE)
-        : JSBI.subtract(TickMath.MAX_SQRT_RATIO, ONE);
-
-    if (zeroForOne) {
-      invariant(
-        JSBI.greaterThan(sqrtPriceLimitX96, TickMath.MIN_SQRT_RATIO),
-        "RATIO_MIN"
-      );
-      invariant(
-        JSBI.lessThan(sqrtPriceLimitX96, this.sqrtRatioX96),
-        "RATIO_CURRENT"
-      );
-    } else {
-      invariant(
-        JSBI.lessThan(sqrtPriceLimitX96, TickMath.MAX_SQRT_RATIO),
-        "RATIO_MAX"
-      );
-      invariant(
-        JSBI.greaterThan(sqrtPriceLimitX96, this.sqrtRatioX96),
-        "RATIO_CURRENT"
-      );
-    }
-
-    const exactInput = JSBI.greaterThanOrEqual(amountSpecified, ZERO);
-
-    // keep track of swap state
-
-    const state = {
-      amountSpecifiedRemaining: amountSpecified,
-      amountCalculated: ZERO,
-      sqrtPriceX96: this.sqrtRatioX96,
-      tick: this.tickCurrent,
-      liquidity: this.liquidity,
-    };
-
-    // start swap while loop
-    while (
-      JSBI.notEqual(state.amountSpecifiedRemaining, ZERO) &&
-      state.sqrtPriceX96 != sqrtPriceLimitX96
-    ) {
-      let step: Partial<StepComputations> = {};
-      step.sqrtPriceStartX96 = state.sqrtPriceX96;
-
-      // because each iteration of the while loop rounds, we can't optimize this code (relative to the smart contract)
-      // by simply traversing to the next available tick, we instead need to exactly replicate
-      // tickBitmap.nextInitializedTickWithinOneWord
-      [step.tickNext, step.initialized] =
-        await this.tickDataProvider.nextInitializedTickWithinOneWord(
-          state.tick,
-          zeroForOne,
-          this.tickSpacing
-        );
-
-      if (step.tickNext < TickMath.MIN_TICK) {
-        step.tickNext = TickMath.MIN_TICK;
-      } else if (step.tickNext > TickMath.MAX_TICK) {
-        step.tickNext = TickMath.MAX_TICK;
-      }
-
-      step.sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(step.tickNext);
-      [state.sqrtPriceX96, step.amountIn, step.amountOut, step.feeAmount] =
-        SwapMath.computeSwapStep(
-          state.sqrtPriceX96,
-          (
-            zeroForOne
-              ? JSBI.lessThan(step.sqrtPriceNextX96, sqrtPriceLimitX96)
-              : JSBI.greaterThan(step.sqrtPriceNextX96, sqrtPriceLimitX96)
-          )
-            ? sqrtPriceLimitX96
-            : step.sqrtPriceNextX96,
-          state.liquidity,
-          state.amountSpecifiedRemaining,
-          this.fee
-        );
-      this.tickDataProvider.addFee(state.tick, step.feeAmount, zeroForOne);
-
-      if (exactInput) {
-        state.amountSpecifiedRemaining = JSBI.subtract(
-          state.amountSpecifiedRemaining,
-          JSBI.add(step.amountIn, step.feeAmount)
-        );
-        state.amountCalculated = JSBI.subtract(
-          state.amountCalculated,
-          step.amountOut
-        );
-      } else {
-        state.amountSpecifiedRemaining = JSBI.add(
-          state.amountSpecifiedRemaining,
-          step.amountOut
-        );
-        state.amountCalculated = JSBI.add(
-          state.amountCalculated,
-          JSBI.add(step.amountIn, step.feeAmount)
-        );
-      }
-
-      // TODO
-      if (JSBI.equal(state.sqrtPriceX96, step.sqrtPriceNextX96)) {
-        // if the tick is initialized, run the tick transition
-        if (step.initialized) {
-          let liquidityNet = JSBI.BigInt(
-            (await this.tickDataProvider.getTick(step.tickNext)).liquidityNet
-          );
-          // if we're moving leftward, we interpret liquidityNet as the opposite sign
-          // safe because liquidityNet cannot be type(int128).min
-          if (zeroForOne)
-            liquidityNet = JSBI.multiply(liquidityNet, NEGATIVE_ONE);
-
-          state.liquidity = LiquidityMath.addDelta(
-            state.liquidity,
-            liquidityNet
-          );
-        }
-
-        state.tick = zeroForOne ? step.tickNext - 1 : step.tickNext;
-      } else if (state.sqrtPriceX96 != step.sqrtPriceStartX96) {
-        // recompute unless we're on a lower tick boundary (i.e. already transitioned ticks), and haven't moved
-        state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX96);
-      }
-    }
-
-    return {
-      amountCalculated: state.amountCalculated,
-      sqrtRatioX96: state.sqrtPriceX96,
-      liquidity: state.liquidity,
-      tickCurrent: state.tick,
-    };
-  }
-  public async addLiquidity(
-    tickLower: number,
-    tickUpper: number,
-    liquidityDelta: number
-  ) {
-    this.tickDataProvider.updateLiquidity(
-      tickLower,
-      JSBI.BigInt(liquidityDelta),
-      false
-    );
-    this.tickDataProvider.updateLiquidity(
-      tickUpper,
-      JSBI.BigInt(liquidityDelta),
-      false
-    );
-  }
-}
-// 시작: 1627959600
-// 끝: 1627963200
-async function getPastPool() {
+async function getPool(blockNumber: number) {
   const poolResult = await axios.post(
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
     {
       query: `{
-        poolDayDatas(
-          where: {
-            pool: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-            date: 1628121600
-          }
-          ){
-          liquidity
-          feeGrowthGlobal0X128
-          feeGrowthGlobal1X128
-          sqrtPrice
-          tick
+    pools(
+      where: {
+        id: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"  
+      }
+      block: {
+        number: ${blockNumber}
+      }
+    ) {
+      liquidity
+      tick
+      sqrtPrice
+    }   }
+    `,
+    }
+  );
+  const result: poolResult = poolResult.data.data.pools[0];
+  const pool: poolResult = {
+    liquidity: result.liquidity,
+    sqrtPrice: result.sqrtPrice,
+    tick: Number(result.tick),
+  };
+  return pool;
+}
+async function getTicks(blockNumber: number) {
+  const tickResult = await axios.post(
+    "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
+    {
+      query: `{
+        ticks(where: {
+          pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+        },
+        block: {
+          number: ${blockNumber}
+        }
+        first: 1000,
+        ) {
+          tickIdx
+          liquidityNet
+          liquidityGross
         }
       }
       `,
     }
   );
-  const Pool = poolResult.data.data.poolDayDatas[0];
-  const pool: poolResult = {
-    feeGrowthGlobal0X128: Pool.feeGrowthGlobal0X128,
-    feeGrowthGlobal1X128: Pool.feeGrowthGlobal1X128,
-    liquidity: Pool.liquidity,
-    sqrtPrice: Pool.sqrtPrice,
-    tick: Pool.tick,
-  };
-  console.log(Pool);
-  const tickResult = await axios.post(
+  const results: tickResult[] = tickResult.data.data.ticks
+    .map((tick: any) => {
+      return {
+        tick: Number(tick.tickIdx),
+        liquidityNet: tick.liquidityNet,
+        liquidityGross: tick.liquidityGross,
+        feeGrowthInside0X: "0",
+        feeGrowthInside1X: "0",
+      };
+    })
+    .sort((a: any, b: any) => {
+      return a.tick > b.tick ? 1 : -1;
+    });
+  return results;
+}
+
+async function blockNumberToTimestamp(blockNumber: number) {
+  const block = await web3.eth.getBlock(blockNumber);
+  return block.timestamp;
+}
+// swap, mints, burn 이벤트를 시간 순으로 정렬한다.
+// 12994010
+// 12994604
+async function getEvents(startBlockNumber: number, endBlockNumber: number) {
+  const startTimestamp = await blockNumberToTimestamp(startBlockNumber);
+  const endTimestamp = await blockNumberToTimestamp(endBlockNumber);
+
+  const swapsResult = await axios.post(
     "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
     {
       query: `{
-        tickDayDatas(
-          first: 1000
-          orderBy: liquidityGross
-          orderDirection: desc
+        swaps(
           where: {
-            date: 1628121600
-            pool: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
-          }
-          
-          ){
-          liquidityGross
-          liquidityNet
-          tick{
-            tickIdx
-          }
-          feeGrowthOutside0X128
-          feeGrowthOutside1X128
+            timestamp_gt: "${startTimestamp}"
+            timestamp_lt: "${endTimestamp}"
+            pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+          },
+          orderBy: timestamp
+          orderDirection: asc
+          first: 1000
+        ){
+          amount0
+          amount1
+          sqrtPriceX96
+          tick
+          timestamp
+        }
+      }
+      `,
+    }
+  );
+  const mintResult = await axios.post(
+    "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
+    {
+      query: `{
+      mints(
+        where: {
+          timestamp_gt: "${startTimestamp}"
+          timestamp_lt: "${endTimestamp}"
+          pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+        },
+        orderBy: timestamp
+        orderDirection: asc
+      ){
+        amount
+        tickLower
+        tickUpper
+        timestamp
+      }
+    }`,
+    }
+  );
+  const burnResult = await axios.post(
+    "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
+    {
+      query: `{
+        burns(
+          where: {
+            timestamp_gt: "${startTimestamp}"
+            timestamp_lt: "${endTimestamp}"
+            pool_contains: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+          },
+          orderBy: timestamp
+          orderDirection: asc
+        ){
+          amount
+          tickLower
+          tickUpper
+          timestamp
         }
       }`,
     }
   );
-  const result = tickResult.data.data.tickDayDatas;
-
-  let ticks: tickResult[] = result.map((value: any) => {
-    return {
-      ...value,
-      tick: value.tick.tickIdx,
-    };
+  const swaps = swapsResult.data.data.swaps.map((swap: any) => ({
+    timestamp: Number(swap.timestamp),
+    tick: Number(swap.tick),
+    amount0: web3.utils.toWei(swap.amount0, "picoether"),
+    amount1: web3.utils.toWei(swap.amount1),
+    sqrtPriceX96: swap.sqrtPriceX96,
+    type: "swap",
+  }));
+  const mints = mintResult.data.data.mints.map((mint: any) => ({
+    amount: mint.amount,
+    tickLower: Number(mint.tickLower),
+    tickUpper: Number(mint.tickUpper),
+    timestamp: Number(mint.timestamp),
+    type: "mint",
+  }));
+  const burns = burnResult.data.data.burns.map((burn: any) => ({
+    amount: burn.amount,
+    tickLower: Number(burn.tickLower),
+    tickUpper: Number(burn.tickUpper),
+    timestamp: Number(burn.timestamp),
+    type: "burn",
+  }));
+  const events = [...swaps, ...mints, ...burns];
+  const eventsOrderedByTime = events.sort((a, b) => {
+    return a.timestamp > b.timestamp ? 1 : -1;
   });
-  // tick을 다 가져왔다고 가정하자 (연속적이라고 생각하자)
+  return eventsOrderedByTime;
+}
 
-  ticks = ticks.sort(function (a, b): number {
-    return a.tick < b.tick ? -1 : a.tick > b.tick ? 1 : 0;
-  });
-  const currentTick = pool.tick;
-  const tickFinal: TickConstructorArgs[] = ticks.map(function (
-    value,
-    idx,
-    array
-  ) {
-    if (idx === array.length - 1) {
-      return {
-        index: array[idx].tick,
-        liquidityGross: array[idx].liquidityGross,
-        liquidityNet: array[idx].liquidityNet,
-        fee0XGrowthInside: "0",
-        fee1XGrowthInside: "0",
-      };
+function add(a: BigintIsh, b: BigintIsh): string {
+  return JSBI.ADD(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
+}
+function sub(a: BigintIsh, b: BigintIsh): string {
+  return JSBI.subtract(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
+}
+function findNextTick(
+  curTick: number,
+  ticks: tickResult[],
+  zeroForOne: boolean
+): number {
+  let idx = 0;
+  ticks.forEach((tick, index) => {
+    if (tick.tick == curTick - (curTick % 60)) {
+      idx = index;
     }
-    const [AboveX0, AboveX1] = getTickAbove(
-      currentTick,
-      pool.feeGrowthGlobal0X128,
-      pool.feeGrowthGlobal1X128,
-      array[idx + 1]
-    );
-    const [BelowX0, BelowX1] = getTickBelow(
-      currentTick,
-      pool.feeGrowthGlobal0X128,
-      pool.feeGrowthGlobal1X128,
-      array[idx]
-    );
-    const outside0x: JSBI = JSBI.ADD(BelowX0, AboveX0);
-    const outside1x: JSBI = JSBI.ADD(BelowX1, AboveX1);
-    return {
-      index: array[idx].tick,
-      liquidityGross: array[idx].liquidityGross,
-      liquidityNet: array[idx].liquidityNet,
-      fee0XGrowthInside: JSBI.subtract(
-        JSBI.BigInt(pool.feeGrowthGlobal0X128),
-        outside0x
-      ),
-      fee1XGrowthInside: JSBI.subtract(
-        JSBI.BigInt(pool.feeGrowthGlobal1X128),
-        outside1x
-      ),
-    };
   });
-}
-
-function getTickAbove(
-  current: number,
-  growth0XInside: BigintIsh,
-  growth1XInside: BigintIsh,
-  tick: tickResult
-): [JSBI, JSBI] {
-  // JSBI.BigInt로 바꿔야 한다.
-  let fee0XAbove: JSBI;
-  let fee1XAbove: JSBI;
-  const foX0 = JSBI.BigInt(tick.feeGrowthOutside0X128);
-  const foX1 = JSBI.BigInt(tick.feeGrowthOutside1X128);
-  const global0X: JSBI = JSBI.BigInt(growth0XInside);
-  const global1X = JSBI.BigInt(growth1XInside);
-  if (current >= tick.tick) {
-    fee0XAbove = JSBI.subtract(global0X, foX0);
-    fee1XAbove = JSBI.subtract(global1X, foX1);
+  if (zeroForOne) {
+    return idx + 1;
   } else {
-    fee0XAbove = foX0;
-    fee1XAbove = foX1;
+    return curTick % 60 == 0 ? idx - 1 : idx;
   }
-  return [fee0XAbove, fee1XAbove];
 }
 
-function getTickBelow(
-  current: number,
-  growth0XInside: BigintIsh,
-  growth1XInside: BigintIsh,
-  tick: tickResult
-): [JSBI, JSBI] {
-  // JSBI.BigInt로 바꿔야 한다.
-  let fee0XBelow: JSBI;
-  let fee1XBelow: JSBI;
-  const foX0 = JSBI.BigInt(tick.feeGrowthOutside0X128);
-  const foX1 = JSBI.BigInt(tick.feeGrowthOutside1X128);
-  const global0X: JSBI = JSBI.BigInt(growth0XInside);
-  const global1X: JSBI = JSBI.BigInt(growth1XInside);
-  if (current >= tick.tick) {
-    fee0XBelow = foX0;
-    fee1XBelow = foX1;
-  } else {
-    fee0XBelow = JSBI.subtract(global0X, foX0);
-    fee1XBelow = JSBI.subtract(global1X, foX1);
-  }
-  return [fee0XBelow, fee1XBelow];
+function findTickIdx(curTick: number, ticks: tickResult[]): number {
+  let idx = -1;
+  ticks.forEach((tick, index) => {
+    if (tick.tick == curTick) {
+      idx = index;
+    }
+  });
+  return idx;
 }
 
+async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
+  let ticks = await getTicks(startBlockNumber);
+  let pool = await getPool(startBlockNumber);
+  const events = await getEvents(startBlockNumber, endBlockNumber);
+  for (let event of events) {
+    if (event.type === "mint") {
+      ticks.forEach((tick) => {
+        if (tick.tick == event.tickLower) {
+          tick.liquidityGross = add(tick.liquidityGross, event.amount);
+          tick.liquidityNet = add(tick.liquidityNet, event.amount);
+        }
+        if (tick.tick == event.tickUpper) {
+          tick.liquidityGross = add(tick.liquidityGross, event.amount);
+          tick.liquidityNet = sub(tick.liquidityNet, event.amount);
+        }
+      });
+    } else if (event.type === "burn") {
+      ticks.forEach((tick) => {
+        if (tick.tick == event.tickLower) {
+          tick.liquidityGross = sub(tick.liquidityGross, event.amount);
+          tick.liquidityNet = sub(tick.liquidityNet, event.amount);
+        }
+        if (tick.tick == event.tickUpper) {
+          tick.liquidityGross = sub(tick.liquidityGross, event.amount);
+          tick.liquidityNet = add(tick.liquidityNet, event.amount);
+        }
+      });
+    } else {
+      console.log("swap!");
+      let cacheLiquidity = JSBI.BigInt(pool.liquidity);
+      const zeroForOne = JSBI.greaterThan(
+        JSBI.BigInt(event.amount0),
+        JSBI.BigInt("0")
+      )
+        ? true
+        : false;
+
+      let state = {
+        amountSpecifiedRemaining: zeroForOne
+          ? JSBI.BigInt(event.amount0)
+          : JSBI.BigInt(event.amount1),
+        tick: pool.tick,
+        liquidity: cacheLiquidity,
+        sqrtPriceX96: JSBI.BigInt(pool.sqrtPrice),
+      };
+
+      while (
+        JSBI.greaterThan(state.amountSpecifiedRemaining, JSBI.BigInt("0"))
+      ) {
+        let step = {
+          sqrtPriceStartX96: JSBI.BigInt("0"),
+          tickNext: 0,
+          sqrtPriceNextX96: JSBI.BigInt("0"),
+          amountIn: JSBI.BigInt("0"),
+          amountOut: JSBI.BigInt("0"),
+          feeAmount: JSBI.BigInt("0"),
+        };
+        step.sqrtPriceStartX96 = state.sqrtPriceX96;
+        const nextTickIdx = findNextTick(state.tick, ticks, zeroForOne);
+
+        step.tickNext = ticks[nextTickIdx].tick;
+        step.sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(step.tickNext);
+        [state.sqrtPriceX96, step.amountIn, step.amountOut, step.feeAmount] =
+          SwapMath.computeSwapStep(
+            state.sqrtPriceX96,
+            step.sqrtPriceNextX96,
+            state.liquidity,
+            state.amountSpecifiedRemaining,
+            FeeAmount.MEDIUM
+          );
+        state.amountSpecifiedRemaining = JSBI.subtract(
+          state.amountSpecifiedRemaining,
+          JSBI.ADD(step.amountIn, step.feeAmount)
+        );
+        if (JSBI.greaterThan(state.liquidity, JSBI.BigInt("0"))) {
+          const curTickIdx = findTickIdx(state.tick, ticks);
+          const feeGrowthDelta = JSBI.divide(
+            JSBI.multiply(step.feeAmount, Q128),
+            state.liquidity
+          ).toString();
+          if (curTickIdx != -1) {
+            if (zeroForOne) {
+              ticks[curTickIdx].feeGrowthInside0X = add(
+                ticks[curTickIdx].feeGrowthInside0X,
+                feeGrowthDelta
+              );
+            } else {
+              ticks[curTickIdx].feeGrowthInside1X = add(
+                ticks[curTickIdx].feeGrowthInside1X,
+                feeGrowthDelta
+              );
+            }
+          }
+        }
+        if (JSBI.equal(state.sqrtPriceX96, step.sqrtPriceNextX96)) {
+          if (zeroForOne) {
+            state.liquidity = JSBI.subtract(
+              state.liquidity,
+              JSBI.BigInt(ticks[nextTickIdx].liquidityNet)
+            );
+          } else {
+            state.liquidity = JSBI.ADD(
+              state.liquidity,
+              JSBI.BigInt(ticks[nextTickIdx].liquidityNet)
+            );
+          }
+        } else {
+          state.tick = TickMath.getTickAtSqrtRatio(state.sqrtPriceX96);
+        }
+      }
+      pool.liquidity = state.liquidity;
+      pool.sqrtPrice = state.sqrtPriceX96;
+      pool.tick = state.tick;
+    }
+  }
+  console.log(ticks);
+  fs.writeFile(
+    "hahas.txt",
+    JSON.stringify(ticks, undefined, 2),
+    function (error) {
+      console.log("error!", error);
+    }
+  );
+}
+calculateFees(12993010, 12994604);
 interface TickConstructorArgs {
   index: number;
   liquidityGross: BigintIsh;
@@ -622,73 +370,18 @@ interface TickConstructorArgs {
 }
 
 interface tickResult {
-  feeGrowthOutside0X128: BigintIsh;
-  feeGrowthOutside1X128: BigintIsh;
   liquidityGross: BigintIsh;
   liquidityNet: BigintIsh;
   tick: number;
+  feeGrowthInside0X: BigintIsh;
+  feeGrowthInside1X: BigintIsh;
 }
 
 interface poolResult {
-  feeGrowthGlobal0X128: BigintIsh;
-  feeGrowthGlobal1X128: BigintIsh;
   liquidity: BigintIsh;
   sqrtPrice: BigintIsh;
   tick: number;
 }
-
-getPastPool();
-
-/*
-{
-  swaps(
-    first:10
-    where: {
-      pool: “0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8”
-    timestamp_gte: 1620586800
-      timestamp_lt:  1620589040
-    }
-  ){
-    token0{symbol}
-    token1{symbol}
-    tick
-    amount0
-    amount1
-    timestamp
-  }
-}
-*/
-
-/*
-{
-  mints(
-    where: {
-      pool: “0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8”
-   timestamp_gte: 1620586800
-      timestamp_lt:  1620589040
-    }
-  ){
-    token0{symbol}
-    token1{symbol}
-    amount0
-    amount1
-    timestamp
-    tickLower
-    tickUpper
-  }
-*/
-
-/*
-{
- poolHourDatas(where: {
-   pool:"0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8",
-   periodStartUnix: 1627959600
- }){
-   tick
-   liquidity
-   sqrtPrice
-   feeGrowthGlobal0X128
-   feeGrowthGlobal1X128
- }
-}
-*/
+// getTicks(12994027);
+// getPool(12994027);
+// getEvents(12994010, 12994604);

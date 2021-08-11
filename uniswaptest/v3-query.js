@@ -1,8 +1,8 @@
 const { GraphQLClient, gql } = require("graphql-request");
 const JSBI = require("jsbi");
-const { convertTypeAcquisitionFromJson } = require("typescript");
 const endpoint = `https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3`;
 const fs = require("fs");
+const { TickMath } = require("@uniswap/v3-sdk/dist/v3-sdk.cjs.development");
 
 const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
@@ -35,6 +35,23 @@ const positionQueryMaker = (blockNumber, id) => gql`
     liquidity
   }
 }
+`;
+
+const poolQueryMaker = (blockNumber) => gql`
+{
+  pools(
+    where: {
+      id: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8"
+    },
+    block: {
+      number: ${blockNumber}
+    }
+  ) {
+    tick
+    sqrtPrice
+  }
+}
+
 `;
 
 const positionDataMaker = async (blockNumber) => {
@@ -82,6 +99,7 @@ const getTicksFromBlock = async (blockNumber) => {
     };
   });
   const orderedTicks = Object.keys(ticks).sort();
+  let count = 0;
   positions.forEach((position) => {
     const {
       feeGrowthInside0LastX128,
@@ -122,12 +140,34 @@ const calculateSub = (a, b) => {
   return JSBI.subtract(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
 };
 
+const getPools = async (blockNumber) => {
+  const poolQuery = poolQueryMaker(blockNumber);
+  const poolData = await graphQLClient.request(poolQuery);
+  return poolData.pools[0];
+};
+
 const main = async () => {
-  const ticksBefore = await getTicksFromBlock(12986980);
-  const ticksAfter = await getTicksFromBlock(12990368);
+  const ticksBefore = await getTicksFromBlock(12992967);
+  const ticksAfter = await getTicksFromBlock(12995764);
+
+  const pool = await getPools(12990368);
+  const currentTick = parseInt(pool.tick);
+  let plusTicks = [];
+  let minusTicks = [];
+
   let results = {};
   const ticks = Object.keys(ticksAfter).sort();
-  let count = 0;
+  ticks.forEach((tick) => {
+    if (currentTick < tick) {
+      plusTicks.push(tick);
+    } else {
+      minusTicks.push(tick);
+    }
+  });
+  plusTicks = plusTicks.sort();
+  minusTicks = minusTicks.sort((a, b) => {
+    return a > b ? -1 : 1;
+  });
   for (let tick of ticks) {
     if (ticksBefore[tick] !== undefined) {
       results[tick] = {
@@ -142,11 +182,13 @@ const main = async () => {
         ),
       };
     } else {
+      console.log("haha");
       results[tick] = ticksAfter[tick];
     }
   }
+
   fs.writeFile(
-    "data1.txt",
+    "hahas.txt",
     JSON.stringify(results, undefined, 2),
     function (error) {
       console.log("error!", error);
