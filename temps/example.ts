@@ -259,75 +259,35 @@ function findTickIdx(curTick: number, ticks: tickResult[]): number {
 async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
   let ticks = await getTicks(startBlockNumber);
   let pool = await getPool(startBlockNumber);
+  var liquidity = JSBI.BigInt(pool.liquidity);
   const events = await getEvents(startBlockNumber, endBlockNumber);
   for (let event of events) {
     if (event.type === "mint") {
-      let lowerIdx = -1;
-      let upperIdx = -1;
-      ticks.forEach((tick, idx) => {
+      ticks.forEach((tick) => {
         if (tick.tick == event.tickLower) {
-          lowerIdx = idx;
+          tick.liquidityGross = add(tick.liquidityGross, event.amount);
+          tick.liquidityNet = add(tick.liquidityNet, event.amount);
         }
         if (tick.tick == event.tickUpper) {
-          upperIdx = idx;
+          tick.liquidityGross = add(tick.liquidityGross, event.amount);
+          tick.liquidityNet = sub(tick.liquidityNet, event.amount);
         }
       });
 
-      if (lowerIdx == -1) {
-        const data: tickResult = {
-          tick: event.tickLower,
-          liquidityGross: "0",
-          liquidityNet: "0",
-          feeGrowthInside0X: "0",
-          feeGrowthInside1X: "0",
-        };
-        ticks.push(data);
-        ticks = ticks.sort((a: any, b: any) => {
-          return a.tick > b.tick ? 1 : -1;
-        });
-        ticks.forEach((tick, idx, array) => {
-          if (array[idx].tick == event.tickLower) {
-            array[idx].liquidityGross = array[idx - 1].liquidityGross;
-            lowerIdx = idx;
-          }
-        });
-      }
-      if (upperIdx == -1) {
-        const data: tickResult = {
-          tick: event.tickUpper,
-          liquidityGross: "0",
-          liquidityNet: "0",
-          feeGrowthInside0X: "0",
-          feeGrowthInside1X: "0",
-        };
-        ticks.push(data);
-        ticks = ticks.sort((a: any, b: any) => {
-          return a.tick > b.tick ? 1 : -1;
-        });
-        ticks.forEach((tick, idx, array) => {
-          if (array[idx].tick == event.tickUpper) {
-            array[idx].liquidityGross = array[idx - 1].liquidityGross;
-            upperIdx = idx;
-          }
-        });
-      }
-      for (let i = lowerIdx; i < upperIdx + 1; i++) {
-        ticks[i].liquidityGross = add(ticks[i].liquidityGross, event.amount);
-      }
+      liquidity = JSBI.add(liquidity, JSBI.BigInt(event.amount));
+
     } else if (event.type === "burn") {
-      let lowerIdx = -1;
-      let upperIdx = -1;
-      ticks.forEach((tick, idx) => {
+      ticks.forEach((tick) => {
         if (tick.tick == event.tickLower) {
-          lowerIdx = idx;
+          tick.liquidityGross = sub(tick.liquidityGross, event.amount);
+          tick.liquidityNet = sub(tick.liquidityNet, event.amount);
         }
         if (tick.tick == event.tickUpper) {
-          upperIdx = idx;
+          tick.liquidityGross = sub(tick.liquidityGross, event.amount);
+          tick.liquidityNet = add(tick.liquidityNet, event.amount);
         }
       });
-      for (let i = lowerIdx; i < upperIdx + 1; i++) {
-        ticks[i].liquidityGross = sub(ticks[i].liquidityGross, event.amount);
-      }
+      liquidity = JSBI.add(liquidity, JSBI.BigInt(event.amount));
     } else {
       // swap 부분
       const zeroForOne = JSBI.greaterThan(
@@ -343,6 +303,7 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
       //console.log(event.amount0);
       while (amounts.toString() !== "0") {
         let liquidity = JSBI.BigInt(ticks[curTickIdx].liquidityGross);
+        //liquidity = JSBI.multiply(liquidity, JSBI.BigInt("100"));
         let nextTickIdx = findNextTick(curTick, ticks, zeroForOne);
         //  console.log(ticks[nextTickIdx].tick);
         let sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(
@@ -356,7 +317,7 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
             amounts,
             FeeAmount.MEDIUM
           );
-        console.log(amountIn.toString());
+        console.log("amount in: ", amountIn.toString());
         sqrtPriceX96 = calsqrtPriceX96;
         // 토큰 양 업데이트
         amounts = JSBI.subtract(amounts, JSBI.add(amountIn, feeAmount));
@@ -393,19 +354,21 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
   };
   let resultss: { [id: string]: Result } = {};
   ticks.forEach((tick) => {
-    let id = tick.tick.toString();
+    if(tick.tick !== null){
+      let id = tick.tick.toString();
 
-    resultss[`${id}`] = {
-      liquidity: tick.liquidityGross,
-      feeGrowthInside0X: tick.feeGrowthInside0X,
-      feeGrowthInside1X: tick.feeGrowthInside1X,
-    };
+      resultss[`${id}`] = {
+        liquidity: tick.liquidityGross,
+        feeGrowthInside0X: tick.feeGrowthInside0X,
+        feeGrowthInside1X: tick.feeGrowthInside1X,
+      };
+    }
   });
   fs.writeFile(
     "hahas.txt",
     JSON.stringify(resultss, undefined, 2),
     function (error) {
-      console.log("error!", error);
+      if(error) console.log("error!", error);
     }
   );
 }
