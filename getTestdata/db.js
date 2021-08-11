@@ -37,11 +37,14 @@ async function wow(){
       useCreateIndex: true,
     });
     
-    mongoose
-    .connect("mongodb+srv://jw:1111@cluster0.yihvy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
+    var db = mongoose.connection;
+    // 4. 연결 실패
+    db.on('error', function(){
+        console.log('Connection Failed!');
+    });
+    // 5. 연결 성공
+    db.once('open', function() {
+        console.log('Connected!');
     });
 
     for(var i = 12370625; i < 12994616; i += 40){

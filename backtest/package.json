@@ -1,0 +1,21 @@
+{
+  "name": "backtest",
+  "type":"module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "graphql-request": "^3.5.0",
+    "mongoose": "^5.13.6"
+  },
+  "devDependencies": {
+    "i": "^0.3.6",
+    "jsbi": "^3.1.6"
+  }
+}
