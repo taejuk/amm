@@ -1606,68 +1606,68 @@
   },
   "195300": {
     "liquidity": "11083920225260041196",
-    "feeGrowthInside0X": "60701206338507215366854797801",
+    "feeGrowthInside0X": "0",
     "feeGrowthInside1X": "0"
   },
   "195360": {
     "liquidity": "42875891599378280",
-    "feeGrowthInside0X": "1057283653519193433374402510232",
+    "feeGrowthInside0X": "0",
     "feeGrowthInside1X": "0"
   },
   "195420": {
     "liquidity": "324476694458302061",
-    "feeGrowthInside0X": "1318849019117618135514237074232",
+    "feeGrowthInside0X": "0",
     "feeGrowthInside1X": "0"
   },
   "195480": {
     "liquidity": "326739064523111795",
-    "feeGrowthInside0X": "1723509464841274044683754096963",
+    "feeGrowthInside0X": "0",
     "feeGrowthInside1X": "0"
   },
   "195540": {
     "liquidity": "272371832052073414",
-    "feeGrowthInside0X": "2095622450554624394786458391604",
+    "feeGrowthInside0X": "0",
     "feeGrowthInside1X": "0"
   },
   "195600": {
     "liquidity": "551517148927005701",
-    "feeGrowthInside0X": "3443666382943345938973153285675",
-    "feeGrowthInside1X": "41054971750542664739894354436804996199"
+    "feeGrowthInside0X": "183880216149919283155757919207",
+    "feeGrowthInside1X": "10754090258632916299695481142124569093"
   },
   "195660": {
     "liquidity": "11357118482706336057",
-    "feeGrowthInside0X": "1250783956660861794840589752592",
-    "feeGrowthInside1X": "201098536753049023417536069795801044901"
+    "feeGrowthInside0X": "438162366136779217258063314040",
+    "feeGrowthInside1X": "70198220608491375026995015979119772181"
   },
   "195720": {
     "liquidity": "10783500988031033171",
-    "feeGrowthInside0X": "1601725453066102744556057675236",
-    "feeGrowthInside1X": "308279334276946361536309982089605829682"
+    "feeGrowthInside0X": "526096354907340730338107010642",
+    "feeGrowthInside1X": "112589021730311745476602988212113300689"
   },
   "195780": {
     "liquidity": "624348424024448928",
-    "feeGrowthInside0X": "3359425946184461119382898541153",
-    "feeGrowthInside1X": "869228915991353736175961410470838310936"
+    "feeGrowthInside0X": "313684508756976956605159623847",
+    "feeGrowthInside1X": "64296171490589406700143599304921813787"
   },
   "195840": {
     "liquidity": "72371859516072059",
-    "feeGrowthInside0X": "859476621916143989219800825169",
-    "feeGrowthInside1X": "834049030185563969709512026778359393550"
+    "feeGrowthInside0X": "157296384275743474362607496564",
+    "feeGrowthInside1X": "0"
   },
   "195900": {
     "liquidity": "561908857927919765",
     "feeGrowthInside0X": "0",
-    "feeGrowthInside1X": "695721054202224338769345120977110296944"
+    "feeGrowthInside1X": "0"
   },
   "195960": {
     "liquidity": "89809156207880452",
     "feeGrowthInside0X": "0",
-    "feeGrowthInside1X": "553377174175673877169799976996075555840"
+    "feeGrowthInside1X": "0"
   },
   "196020": {
     "liquidity": "8735404541547901066",
     "feeGrowthInside0X": "0",
-    "feeGrowthInside1X": "90883041023020254686598875345524539704"
+    "feeGrowthInside1X": "0"
   },
   "196080": {
     "liquidity": "178924460824108842",
