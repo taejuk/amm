@@ -15,6 +15,8 @@ export const getPoolQuery = (data: queryData) =>{
             number: ${data.blockNumber}
           }
         ) {
+          createdAtBlockNumber
+          createdAtTimestamp
           liquidity
           tick
           sqrtPrice
