@@ -19,6 +19,7 @@ export abstract class SwapMath {
     amountRemaining: JSBI,
     feePips: FeeAmount
   ): [JSBI, JSBI, JSBI, JSBI] {
+    
     const returnValues: Partial<{
       sqrtRatioNextX96: JSBI;
       amountIn: JSBI;

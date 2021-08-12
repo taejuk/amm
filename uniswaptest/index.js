@@ -40,7 +40,7 @@ const {
   getTokenContract,
   getNFPContract,
 } = require("./contracts");
-const { DAI, ETH } = require("./tokens");
+const { DAI, ETH, USDC } = require("./tokens");
 
 const address = "0xB2eE48A4CDCDe4DeEA3D93057B9e4cDBc8b6E2B6";
 const privateKey = Buffer.from(
@@ -49,7 +49,7 @@ const privateKey = Buffer.from(
 );
 // web3 instance:
 const web3 = new Web3(
-  "https://ropsten.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
+  "https://mainnet.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
 );
 
 const BN = web3.utils.BN;
@@ -164,6 +164,7 @@ async function createPosition(
     amount0: amount.quotient,
     useFullPrecision: true,
   });
+  console.log(amount.quotient.toString());
   return position;
 }
 
@@ -404,7 +405,10 @@ async function burnLiquidity(tokenId) {
   sendTx(rawTx);
 }
 async function main() {
-  burnLiquidity("4707");
+  //console.log(parseAmount("100", USDC).quotient.toString());
+  //console.log(TickMath.getSqrtRatioAtTick(196048).toString());
+  //console.log(tickToPrice(WETH9[1], USDC, 201180).toSignificant(6));
+  console.log(web3.utils.toWei("-1"));
 }
 
 main();
