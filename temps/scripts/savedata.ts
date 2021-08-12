@@ -6,6 +6,7 @@ import * as Constants from './constants';
 import JSBI from "jsbi";
 import { TickMath, FeeAmount } from "@uniswap/v3-sdk";
 import { SwapMath } from "../swapMath";
+import mongoose from 'mongoose';
 
 export const URI = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3";
 export const ID = "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8";
@@ -23,6 +24,12 @@ export interface poolResult {
     sqrtPrice: BigintIsh;
     tick: number;
 }
+
+type Result = {
+    liquidity: BigintIsh;
+    feeGrowthInside0X: BigintIsh;
+    feeGrowthInside1X: BigintIsh;
+};
 
 export async function getPool(blockNumber: Number){
     const poolResult = await axios.post(URI,
@@ -289,11 +296,6 @@ export async function calculateFees(startBlockNumber: number, endBlockNumber: nu
       console.log(`(${event.type}) liquidity : `, liquidity.toString());
       //console.log(`tick liquidity : `, ticks[findTickIdx(tickCurrent, ticks)]);
     }//for end
-    type Result = {
-      liquidity: BigintIsh;
-      feeGrowthInside0X: BigintIsh;
-      feeGrowthInside1X: BigintIsh;
-    };
     let resultss: { [id: string]: Result } = {};
     ticks.forEach((tick) => {
       let id = tick.tick.toString();
@@ -312,4 +314,46 @@ export async function calculateFees(startBlockNumber: number, endBlockNumber: nu
     //     console.log("error!", error);
     //   }
     // );
-  }
+}
+
+const tickFee = new mongoose.Schema({
+    tickIdx: 'number',
+    liquidity: 'string',
+    feeGrowthInside0X: 'string',
+    feeGrowthInside1X: 'string',
+});
+
+const blockData = new mongoose.Schema({
+    startBlockNumner : 'number',
+    endBlockNumber: 'number',
+    //start time, end time
+    tickFees: [tickFee],
+    pool: 'string',
+    price: 'string'
+})
+
+const BlockDatas = mongoose.model('blockDatas', blockData);
+
+function saveData(){
+    //calc start block, end block
+    mongoose
+    .connect("mongodb+srv://jw:1111@cluster0.yihvy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+    });
+
+    var db = mongoose.connection;
+    // 4. 연결 실패
+    db.on('error', function(){
+        console.log('Connection Failed!');
+    });
+    // 5. 연결 성공
+    db.once('open', function() {
+        console.log('Connected!');
+    });
+
+
+
+
+}
