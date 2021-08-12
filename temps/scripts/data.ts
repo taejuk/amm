@@ -14,11 +14,10 @@ import { BigintIsh } from "@uniswap/sdk-core";
 import invariant from "tiny-invariant";
 
 import axios from "axios";
-import { SwapMath } from "../swapMath";
 
 import JSBI from "jsbi";
 import fs from "fs";
-import { blockNumberToTimestamp, toWei } from "./blockNumberToTimestamp";
+import { blockNumberToTimestamp, SwapMath, toWei } from "./utils";
 const NEGATIVE_ONE = JSBI.BigInt(-1);
 const ZERO = JSBI.BigInt(0);
 const ONE = JSBI.BigInt(1);
@@ -113,9 +112,6 @@ async function getTicks(blockNumber: number) {
   return results;
 }
 
-// swap, mints, burn 이벤트를 시간 순으로 정렬한다.
-// 12994010
-// 12994604
 async function getEvents(startBlockNumber: number, endBlockNumber: number) {
   const startTimestamp = await blockNumberToTimestamp(startBlockNumber);
   const endTimestamp = await blockNumberToTimestamp(endBlockNumber);
@@ -250,8 +246,8 @@ function findTickIdx(curTick: number, ticks: tickResult[]): number {
 }
 
 async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
-  let ticks = await getTicks(startBlockNumber-1);
-  let pool = await getPool(startBlockNumber-1);
+  let ticks = await getTicks(startBlockNumber - 1);
+  let pool = await getPool(startBlockNumber - 1);
   let liquidity = JSBI.BigInt(pool.liquidity);
   const events = await getEvents(startBlockNumber, endBlockNumber);
   for (let event of events) {
@@ -410,4 +406,3 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
     }
   );
 }
-calculateFees(12999114, 13002308);
