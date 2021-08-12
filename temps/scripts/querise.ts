@@ -1,15 +1,15 @@
 export interface queryData{
     id: string,
     blockNumber?: Number,
-    startTimestamp?: Number,
-    endTimestamp?: Number,
+    startTimestamp?: string | number,
+    endTimestamp?: string | number,
 }
 
-export const getPoolQuery = (data: queryData)=>{
-    `{
+export const getPoolQuery = (data: queryData) =>{
+    return `{
         pools(
           where: {
-            id: ${data.id}  
+            id: "${data.id}" 
           }
           block: {
             number: ${data.blockNumber}
@@ -24,9 +24,9 @@ export const getPoolQuery = (data: queryData)=>{
 }
 
 export const getTicksQuery = (data:queryData) => {
-    `{
+    return `{
         ticks(where: {
-          pool_contains: ${data.id}
+          pool_contains: "${data.id}"
         },
         block: {
           number: ${data.blockNumber}
@@ -46,12 +46,12 @@ export const getEventsQuery = (
     type: String
     ) => {
         if(type === 'swaps'){
-            `{
+            return `{
                 ${type}(
                   where: {
                     timestamp_gt: "${data.startTimestamp}"
                     timestamp_lt: "${data.endTimestamp}"
-                    pool_contains: ${data.id}
+                    pool_contains: "${data.id}"
                   },
                   orderBy: timestamp
                   orderDirection: asc
@@ -72,7 +72,7 @@ export const getEventsQuery = (
                   where: {
                     timestamp_gt: "${data.startTimestamp}"
                     timestamp_lt: "${data.endTimestamp}"
-                    pool_contains: ${data.id}
+                    pool_contains: "${data.id}"
                   },
                   orderBy: timestamp
                   orderDirection: asc
@@ -86,11 +86,11 @@ export const getEventsQuery = (
         }
         else if(type === "burns"){
             return `{
-                mints(
+                burns(
                   where: {
                     timestamp_gt: "${data.startTimestamp}"
                     timestamp_lt: "${data.endTimestamp}"
-                    pool_contains: ${data.id}
+                    pool_contains: "${data.id}"
                   },
                   orderBy: timestamp
                   orderDirection: asc

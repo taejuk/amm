@@ -426,6 +426,7 @@ import {
         feeGrowthInside1X: tick.feeGrowthInside1X,
       };
     });
+    console.log("tick : ", ticks[findTickIdx(tickCurrent, ticks)]);
     fs.writeFile(
       "hahass.txt",
       JSON.stringify(resultss, undefined, 2),
@@ -434,4 +435,6 @@ import {
       }
     );
   }
-  calculateFees(12999114, 13002308);
+
+  
+  calculateFees(13003071, 13009519);
