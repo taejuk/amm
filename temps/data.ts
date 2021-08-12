@@ -348,18 +348,14 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
         ? JSBI.BigInt(event.amount0)
         : JSBI.BigInt(event.amount1);
       let curTickIdx = findTickIdx(curTick, ticks);
-      console.log("amount0:", event.amount0);
-      console.log("amount1:", event.amount1);
       console.log(zeroForOne);
       while (amounts.toString() !== "0") {
         let liquidity = JSBI.BigInt(ticks[curTickIdx].liquidityGross);
         let nextTickIdx = findNextTick(curTick, ticks, zeroForOne);
-        console.log(curTick);
-        console.log();
         let sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(
           ticks[nextTickIdx].tick
         );
-        console.log(curTickIdx - nextTickIdx);
+
         let [calsqrtPriceX96, amountIn, amountOut, feeAmount] =
           SwapMath.computeSwapStep(
             sqrtPriceX96,
@@ -422,7 +418,3 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
   );
 }
 calculateFees(12999114, 13002308);
-
-// getTicks(12994027);
-// getPool(12994027);
-// getEvents(12994010, 12994604);
