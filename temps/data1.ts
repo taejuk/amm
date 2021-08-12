@@ -327,6 +327,7 @@ import {
             liquidity = JSBI.add(liquidity, JSBI.BigInt(event.amount));
         }
       } else if (event.type === "burn") {
+          
         ticks.forEach((tick) => {
           if (tick.tick == event.tickLower) {
             tick.liquidityGross = sub(tick.liquidityGross, event.amount);
@@ -408,6 +409,7 @@ import {
         }//while 끝
       }
       console.log(`(${event.type}) liquidity : `, liquidity.toString());
+      //console.log(`tick liquidity : `, ticks[findTickIdx(tickCurrent, ticks)]);
     }//for end
     type Result = {
       liquidity: BigintIsh;
