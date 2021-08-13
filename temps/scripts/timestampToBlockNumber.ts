@@ -25,3 +25,5 @@ export async function timestampToBlockNumber(timestamp: number): Promise<number>
   //console.log("data : ", data.blocks[0].number);
   return data.blocks[0].number;
 }
+
+//timestampToBlockNumber(1628837480).then((data)=>console.log(data));

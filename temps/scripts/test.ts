@@ -7,7 +7,12 @@ const main = async () => {
     //const startTimestamp = await blockNumberToTimestamp(13002304);
     //const endTimestamp = await blockNumberToTimestamp(13002500);
 
-    await saveData();
+    const data = await calculateFees(13002304, 1300250);
+    //console.log(data)
+    data.map((d)=>{
+        if(d.feeGrowthInside0X !== )
+            console.log(data);
+    })
 }
 
 main();

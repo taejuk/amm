@@ -151,11 +151,13 @@ export async function getEvents(startTimestamp: string | number, endTimestamp: s
 //todo : burn 시 해제되는 tick 삭제
 export async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
     let ticks = await getTicks(startBlockNumber-1);
+    const startTimestamp = await blockNumberToTimestamp(startBlockNumber);
+    const endTimestamp = await blockNumberToTimestamp(endBlockNumber);
     //console.log("calculateFees getticks : ", ticks);
     let pool = await getPool(startBlockNumber-1);
     let liquidity = JSBI.BigInt(pool.liquidity);
     let tickCurrent = pool.tick;
-    const events = await getEvents(startBlockNumber, endBlockNumber);
+    const events = await getEvents( startTimestamp , endTimestamp);
     for (let event of events) {
       if (event.type === "mint") {
         let lowerIdx = -1;
@@ -316,6 +318,13 @@ export async function calculateFees(startBlockNumber: number, endBlockNumber: nu
       }
     );
     return resultDatas;
+    // fs.writeFile(
+    //   "results.txt",
+    //   JSON.stringify(resultDatas, undefined, 2),
+    //   function (error) {
+    //     console.log("error!", error);
+    //   }
+    // );
 }
 
 const tickFee = new mongoose.Schema({
