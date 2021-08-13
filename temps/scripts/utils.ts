@@ -9,7 +9,7 @@ const web3 = new Web3(INFURA);
 
 export async function blockNumberToTimestamp(blockNumber: number) {
   const block = await web3.eth.getBlock(blockNumber);
-  console.log("block to timestamp : ", block.timestamp);
+  //console.log("block to timestamp : ", block.timestamp);
   return block.timestamp;
 }
 
