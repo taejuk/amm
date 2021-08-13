@@ -2,3 +2,8 @@
 uniswaptest/node_modules/
 getTestdata/node_modules/
 temps/node_modules/
+backtest/node_modules/
+
+node_modules
+dist/*
+*.log

@@ -27,6 +27,8 @@ const Positions = mongoose.model('Schema', mongoose.Schema({
     feeGrowthInside1LastX128: 'string',
 }));
 
+
+
 async function wow(){
   mongoose
     .connect("mongodb+srv://jw:1111@cluster0.yihvy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", {
@@ -35,15 +37,14 @@ async function wow(){
       useCreateIndex: true,
     });
     
-    const db = mongoose.connection;
-
+    var db = mongoose.connection;
     // 4. 연결 실패
     db.on('error', function(){
         console.log('Connection Failed!');
     });
     // 5. 연결 성공
-    db.once('open', function(data) {
-        console.log('Connected!', data);
+    db.once('open', function() {
+        console.log('Connected!');
     });
 
     for(var i = 12370625; i < 12994616; i += 40){

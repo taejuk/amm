@@ -1,5 +1,26 @@
-import { FeeAmount, FullMath, SqrtPriceMath } from "@uniswap/v3-sdk";
+import Web3 from "web3";
+import { INFURA } from "./constants";
+import { tickResult } from "./savedata";
 import JSBI from "jsbi";
+import { BigintIsh } from "@uniswap/sdk-core";
+import { FeeAmount, FullMath, SqrtPriceMath } from "@uniswap/v3-sdk";
+
+const web3 = new Web3(INFURA);
+
+export async function blockNumberToTimestamp(blockNumber: number) {
+  const block = await web3.eth.getBlock(blockNumber);
+  console.log("block to timestamp : ", block.timestamp);
+  return block.timestamp;
+}
+
+export async function getCurrentBlock(){
+  return await web3.eth.getBlockNumber();
+}
+
+export function toWei(data: any, option?: any) {
+  if (option) return web3.utils.toWei(data);
+  else return web3.utils.toWei(data, option);
+}
 
 const ZERO = JSBI.BigInt(0);
 const NEGATIVE_ONE = JSBI.BigInt(-1);
@@ -19,7 +40,6 @@ export abstract class SwapMath {
     amountRemaining: JSBI,
     feePips: FeeAmount
   ): [JSBI, JSBI, JSBI, JSBI] {
-    
     const returnValues: Partial<{
       sqrtRatioNextX96: JSBI;
       amountIn: JSBI;
@@ -174,4 +194,38 @@ export abstract class SwapMath {
       returnValues.feeAmount!,
     ];
   }
+}
+export function findNextTick(
+  curTick: number,
+  ticks: tickResult[],
+  zeroForOne: boolean
+): number {
+  let idx = 0;
+  ticks.forEach((tick, index) => {
+    if (tick.tick == curTick - (curTick % 60)) {
+      idx = index;
+    }
+  });
+  if (zeroForOne) {
+    return curTick % 60 == 0 ? idx - 1 : idx;
+  } else {
+    return idx + 1;
+  }
+}
+
+export function findTickIdx(curTick: number, ticks: tickResult[]): number {
+  let idx = -1;
+  ticks.forEach((tick, index) => {
+    if (tick.tick == curTick - (curTick % 60)) {
+      idx = index;
+    }
+  });
+  return idx;
+}
+
+export function add(a: BigintIsh, b: BigintIsh): string {
+  return JSBI.ADD(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
+}
+export function sub(a: BigintIsh, b: BigintIsh): string {
+  return JSBI.subtract(JSBI.BigInt(a), JSBI.BigInt(b)).toString();
 }

@@ -1,0 +1,5609 @@
+{
+  "_id": "6115304018fc3d26b413c3e6",
+  "startBlockNumner": 13004241,
+  "endBlockNumber": 13010641,
+  "tickFees": [
+    {
+      "_id": "6115304018fc3d26b413c3e7",
+      "tickIdx": -887220,
+      "liquidity": "628226166027327",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3e8",
+      "tickIdx": -887160,
+      "liquidity": "167321826290357",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3e9",
+      "tickIdx": -759900,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3ea",
+      "tickIdx": -690720,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3eb",
+      "tickIdx": -300240,
+      "liquidity": "24071352338724",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3ec",
+      "tickIdx": -201240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3ed",
+      "tickIdx": -197940,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3ee",
+      "tickIdx": -76140,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3ef",
+      "tickIdx": -76020,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f0",
+      "tickIdx": -75420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f1",
+      "tickIdx": -74640,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f2",
+      "tickIdx": -51420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f3",
+      "tickIdx": -49320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f4",
+      "tickIdx": -1080,
+      "liquidity": "955255939572502",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f5",
+      "tickIdx": 0,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f6",
+      "tickIdx": 22980,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f7",
+      "tickIdx": 46080,
+      "liquidity": "444631270557193",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f8",
+      "tickIdx": 62460,
+      "liquidity": "438761967803",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3f9",
+      "tickIdx": 63780,
+      "liquidity": "2936263980950",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3fa",
+      "tickIdx": 69060,
+      "liquidity": "102020005026340",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3fb",
+      "tickIdx": 74160,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3fc",
+      "tickIdx": 92040,
+      "liquidity": "49404839996145",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3fd",
+      "tickIdx": 92100,
+      "liquidity": "136908308838002",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3fe",
+      "tickIdx": 105960,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c3ff",
+      "tickIdx": 115140,
+      "liquidity": "50602192969252",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c400",
+      "tickIdx": 120660,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c401",
+      "tickIdx": 121860,
+      "liquidity": "51853265344561",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c402",
+      "tickIdx": 127020,
+      "liquidity": "23599758490300",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c403",
+      "tickIdx": 132000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c404",
+      "tickIdx": 138180,
+      "liquidity": "5993742055125482",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c405",
+      "tickIdx": 141780,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c406",
+      "tickIdx": 143460,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c407",
+      "tickIdx": 144360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c408",
+      "tickIdx": 145080,
+      "liquidity": "1177620950428",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c409",
+      "tickIdx": 145680,
+      "liquidity": "78968700919257",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c40a",
+      "tickIdx": 147300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c40b",
+      "tickIdx": 148440,
+      "liquidity": "5682652725524",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c40c",
+      "tickIdx": 149160,
+      "liquidity": "368463335144",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c40d",
+      "tickIdx": 149400,
+      "liquidity": "82670472645576",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c40e",
+      "tickIdx": 150180,
+      "liquidity": "121336659580194",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c40f",
+      "tickIdx": 151200,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c410",
+      "tickIdx": 152040,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c411",
+      "tickIdx": 152280,
+      "liquidity": "541836663071250",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c412",
+      "tickIdx": 152340,
+      "liquidity": "55368831069002",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c413",
+      "tickIdx": 153600,
+      "liquidity": "19255919433172",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c414",
+      "tickIdx": 154200,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c415",
+      "tickIdx": 154260,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c416",
+      "tickIdx": 154380,
+      "liquidity": "315386766245284",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c417",
+      "tickIdx": 154800,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c418",
+      "tickIdx": 155040,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c419",
+      "tickIdx": 155580,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c41a",
+      "tickIdx": 156060,
+      "liquidity": "2074343196363",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c41b",
+      "tickIdx": 156360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c41c",
+      "tickIdx": 157140,
+      "liquidity": "16485423471981",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c41d",
+      "tickIdx": 159300,
+      "liquidity": "23434708588618",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c41e",
+      "tickIdx": 159960,
+      "liquidity": "185592721819791",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c41f",
+      "tickIdx": 160560,
+      "liquidity": "257775493332198",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c420",
+      "tickIdx": 161160,
+      "liquidity": "2573328558072663",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c421",
+      "tickIdx": 162120,
+      "liquidity": "961652346063",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c422",
+      "tickIdx": 162360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c423",
+      "tickIdx": 163380,
+      "liquidity": "2913618732985562",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c424",
+      "tickIdx": 164760,
+      "liquidity": "141583341506618",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c425",
+      "tickIdx": 165660,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c426",
+      "tickIdx": 166320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c427",
+      "tickIdx": 166440,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c428",
+      "tickIdx": 167580,
+      "liquidity": "961652346063",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c429",
+      "tickIdx": 168000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c42a",
+      "tickIdx": 168120,
+      "liquidity": "33305886155967",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c42b",
+      "tickIdx": 168360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c42c",
+      "tickIdx": 169200,
+      "liquidity": "1957485398494",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c42d",
+      "tickIdx": 169860,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c42e",
+      "tickIdx": 170340,
+      "liquidity": "1102401024432242",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c42f",
+      "tickIdx": 170640,
+      "liquidity": "715642795490925",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c430",
+      "tickIdx": 171180,
+      "liquidity": "103425120429213",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c431",
+      "tickIdx": 171420,
+      "liquidity": "127679600216933",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c432",
+      "tickIdx": 171720,
+      "liquidity": "1330724540444729",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c433",
+      "tickIdx": 171780,
+      "liquidity": "96553173606062",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c434",
+      "tickIdx": 172200,
+      "liquidity": "21409817006605",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c435",
+      "tickIdx": 172440,
+      "liquidity": "24342028274317",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c436",
+      "tickIdx": 172560,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c437",
+      "tickIdx": 172740,
+      "liquidity": "1177570850366022",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c438",
+      "tickIdx": 173160,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c439",
+      "tickIdx": 173220,
+      "liquidity": "447670820925842",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c43a",
+      "tickIdx": 173280,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c43b",
+      "tickIdx": 173400,
+      "liquidity": "779084594326922",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c43c",
+      "tickIdx": 173700,
+      "liquidity": "16976441980382",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c43d",
+      "tickIdx": 173820,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c43e",
+      "tickIdx": 174180,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c43f",
+      "tickIdx": 174300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c440",
+      "tickIdx": 174420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c441",
+      "tickIdx": 174480,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c442",
+      "tickIdx": 174660,
+      "liquidity": "19356613386885",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c443",
+      "tickIdx": 175080,
+      "liquidity": "4404554648097979",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c444",
+      "tickIdx": 175500,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c445",
+      "tickIdx": 175560,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c446",
+      "tickIdx": 175860,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c447",
+      "tickIdx": 176160,
+      "liquidity": "2560685329292220",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c448",
+      "tickIdx": 176340,
+      "liquidity": "45238698750846",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c449",
+      "tickIdx": 176700,
+      "liquidity": "23083853964003",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c44a",
+      "tickIdx": 176820,
+      "liquidity": "553292737118090",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c44b",
+      "tickIdx": 176940,
+      "liquidity": "609603054803531",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c44c",
+      "tickIdx": 177060,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c44d",
+      "tickIdx": 177120,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c44e",
+      "tickIdx": 177180,
+      "liquidity": "63008077069652993",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c44f",
+      "tickIdx": 177240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c450",
+      "tickIdx": 177300,
+      "liquidity": "16575722653500996",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c451",
+      "tickIdx": 177360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c452",
+      "tickIdx": 177540,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c453",
+      "tickIdx": 177840,
+      "liquidity": "553292737118090",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c454",
+      "tickIdx": 178260,
+      "liquidity": "1539539755500143",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c455",
+      "tickIdx": 178320,
+      "liquidity": "21973657172069",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c456",
+      "tickIdx": 178380,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c457",
+      "tickIdx": 178620,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c458",
+      "tickIdx": 178740,
+      "liquidity": "7953468825711",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c459",
+      "tickIdx": 178920,
+      "liquidity": "4944955212110865",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c45a",
+      "tickIdx": 179460,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c45b",
+      "tickIdx": 179520,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c45c",
+      "tickIdx": 179820,
+      "liquidity": "111256504368680",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c45d",
+      "tickIdx": 179880,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c45e",
+      "tickIdx": 180000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c45f",
+      "tickIdx": 180060,
+      "liquidity": "1261916787522828",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c460",
+      "tickIdx": 180120,
+      "liquidity": "86452793006663",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c461",
+      "tickIdx": 180180,
+      "liquidity": "467758497268624",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c462",
+      "tickIdx": 180240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c463",
+      "tickIdx": 180300,
+      "liquidity": "2392839373140143",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c464",
+      "tickIdx": 180420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c465",
+      "tickIdx": 180480,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c466",
+      "tickIdx": 180600,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c467",
+      "tickIdx": 180840,
+      "liquidity": "121523876978255",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c468",
+      "tickIdx": 180900,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c469",
+      "tickIdx": 180960,
+      "liquidity": "82572241773119",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c46a",
+      "tickIdx": 181020,
+      "liquidity": "6844438646565",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c46b",
+      "tickIdx": 181140,
+      "liquidity": "3983869358972",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c46c",
+      "tickIdx": 181260,
+      "liquidity": "9021441644082",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c46d",
+      "tickIdx": 181380,
+      "liquidity": "2204035747945143",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c46e",
+      "tickIdx": 181440,
+      "liquidity": "799467314593202",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c46f",
+      "tickIdx": 181500,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c470",
+      "tickIdx": 181620,
+      "liquidity": "784998199070818",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c471",
+      "tickIdx": 181800,
+      "liquidity": "6681401016741",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c472",
+      "tickIdx": 181980,
+      "liquidity": "5092747570710261",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c473",
+      "tickIdx": 182100,
+      "liquidity": "1295157729979480",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c474",
+      "tickIdx": 182160,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c475",
+      "tickIdx": 182340,
+      "liquidity": "12578446423080",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c476",
+      "tickIdx": 182400,
+      "liquidity": "7592265812480888",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c477",
+      "tickIdx": 182460,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c478",
+      "tickIdx": 182580,
+      "liquidity": "52734500916471",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c479",
+      "tickIdx": 182700,
+      "liquidity": "1008270440908617",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c47a",
+      "tickIdx": 182760,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c47b",
+      "tickIdx": 182820,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c47c",
+      "tickIdx": 183000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c47d",
+      "tickIdx": 183060,
+      "liquidity": "2889926116440145",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c47e",
+      "tickIdx": 183180,
+      "liquidity": "17296075409",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c47f",
+      "tickIdx": 183240,
+      "liquidity": "46359304681045899",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c480",
+      "tickIdx": 183300,
+      "liquidity": "349495655052777",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c481",
+      "tickIdx": 183360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c482",
+      "tickIdx": 183540,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c483",
+      "tickIdx": 183720,
+      "liquidity": "1399010260561027",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c484",
+      "tickIdx": 183840,
+      "liquidity": "335263303760328",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c485",
+      "tickIdx": 183900,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c486",
+      "tickIdx": 183960,
+      "liquidity": "75037607362344",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c487",
+      "tickIdx": 184020,
+      "liquidity": "260199976226393",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c488",
+      "tickIdx": 184140,
+      "liquidity": "55534367443739255",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c489",
+      "tickIdx": 184200,
+      "liquidity": "56043223726568267",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c48a",
+      "tickIdx": 184260,
+      "liquidity": "158596901418060",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c48b",
+      "tickIdx": 184320,
+      "liquidity": "40665245764266",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c48c",
+      "tickIdx": 184440,
+      "liquidity": "829048669395070",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c48d",
+      "tickIdx": 184500,
+      "liquidity": "1679054107773095",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c48e",
+      "tickIdx": 184560,
+      "liquidity": "17346283988278",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c48f",
+      "tickIdx": 184620,
+      "liquidity": "512137045047",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c490",
+      "tickIdx": 184680,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c491",
+      "tickIdx": 184740,
+      "liquidity": "623738941063610",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c492",
+      "tickIdx": 184860,
+      "liquidity": "316874206147974",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c493",
+      "tickIdx": 184920,
+      "liquidity": "24219382707540",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c494",
+      "tickIdx": 184980,
+      "liquidity": "963692793356040",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c495",
+      "tickIdx": 185160,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c496",
+      "tickIdx": 185220,
+      "liquidity": "50295249594141",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c497",
+      "tickIdx": 185280,
+      "liquidity": "3029012763502252",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c498",
+      "tickIdx": 185400,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c499",
+      "tickIdx": 185520,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c49a",
+      "tickIdx": 185580,
+      "liquidity": "661945810010155",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c49b",
+      "tickIdx": 185640,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c49c",
+      "tickIdx": 185700,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c49d",
+      "tickIdx": 185760,
+      "liquidity": "91666704477317",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c49e",
+      "tickIdx": 185820,
+      "liquidity": "36335936806222494",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c49f",
+      "tickIdx": 185880,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a0",
+      "tickIdx": 185940,
+      "liquidity": "748582127206048",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a1",
+      "tickIdx": 186000,
+      "liquidity": "798819854451952",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a2",
+      "tickIdx": 186060,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a3",
+      "tickIdx": 186120,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a4",
+      "tickIdx": 186180,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a5",
+      "tickIdx": 186300,
+      "liquidity": "176116445247275",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a6",
+      "tickIdx": 186360,
+      "liquidity": "3752173200585182",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a7",
+      "tickIdx": 186420,
+      "liquidity": "45075630116168006",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a8",
+      "tickIdx": 186480,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4a9",
+      "tickIdx": 186540,
+      "liquidity": "17360731073290",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4aa",
+      "tickIdx": 186660,
+      "liquidity": "9695986652863997",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ab",
+      "tickIdx": 186720,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ac",
+      "tickIdx": 186780,
+      "liquidity": "11991237557306",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ad",
+      "tickIdx": 186840,
+      "liquidity": "1384803404473681",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ae",
+      "tickIdx": 187020,
+      "liquidity": "20302723035113",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4af",
+      "tickIdx": 187080,
+      "liquidity": "6376246802163969",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b0",
+      "tickIdx": 187200,
+      "liquidity": "50295249594141",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b1",
+      "tickIdx": 187260,
+      "liquidity": "2348121224556",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b2",
+      "tickIdx": 187320,
+      "liquidity": "427282985305764",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b3",
+      "tickIdx": 187440,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b4",
+      "tickIdx": 187500,
+      "liquidity": "343519948770733",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b5",
+      "tickIdx": 187560,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b6",
+      "tickIdx": 187620,
+      "liquidity": "7667937501739617",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b7",
+      "tickIdx": 187680,
+      "liquidity": "121729971773074",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b8",
+      "tickIdx": 187740,
+      "liquidity": "42689784368756042",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4b9",
+      "tickIdx": 187800,
+      "liquidity": "104026188459931361",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ba",
+      "tickIdx": 187860,
+      "liquidity": "687090326565460",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4bb",
+      "tickIdx": 187920,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4bc",
+      "tickIdx": 187980,
+      "liquidity": "393741899104774",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4bd",
+      "tickIdx": 188040,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4be",
+      "tickIdx": 188100,
+      "liquidity": "65863161048847807",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4bf",
+      "tickIdx": 188160,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c0",
+      "tickIdx": 188220,
+      "liquidity": "16038790033534199",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c1",
+      "tickIdx": 188280,
+      "liquidity": "1027602745372681",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c2",
+      "tickIdx": 188340,
+      "liquidity": "11470434517859",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c3",
+      "tickIdx": 188400,
+      "liquidity": "3989022823249285",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c4",
+      "tickIdx": 188460,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c5",
+      "tickIdx": 188520,
+      "liquidity": "3615119707342417",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c6",
+      "tickIdx": 188580,
+      "liquidity": "6031800532535362",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c7",
+      "tickIdx": 188640,
+      "liquidity": "337225344460777",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c8",
+      "tickIdx": 188700,
+      "liquidity": "3272073793512043",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4c9",
+      "tickIdx": 188760,
+      "liquidity": "2692647873650038",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ca",
+      "tickIdx": 188820,
+      "liquidity": "2203538444419840",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4cb",
+      "tickIdx": 188880,
+      "liquidity": "3431864693461886",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4cc",
+      "tickIdx": 188940,
+      "liquidity": "660775707782061",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4cd",
+      "tickIdx": 189000,
+      "liquidity": "7210668712435234",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ce",
+      "tickIdx": 189060,
+      "liquidity": "6356120860390683",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4cf",
+      "tickIdx": 189120,
+      "liquidity": "36989710473253",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d0",
+      "tickIdx": 189180,
+      "liquidity": "2433145199961960",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d1",
+      "tickIdx": 189240,
+      "liquidity": "703249718771016",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d2",
+      "tickIdx": 189300,
+      "liquidity": "98413162323276056",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d3",
+      "tickIdx": 189360,
+      "liquidity": "4913681492751151",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d4",
+      "tickIdx": 189420,
+      "liquidity": "339850837500292",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d5",
+      "tickIdx": 189480,
+      "liquidity": "24830419754744230",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d6",
+      "tickIdx": 189540,
+      "liquidity": "222337733911031",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d7",
+      "tickIdx": 189600,
+      "liquidity": "861469166974155",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d8",
+      "tickIdx": 189660,
+      "liquidity": "20530453231456160",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4d9",
+      "tickIdx": 189720,
+      "liquidity": "595229323336470",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4da",
+      "tickIdx": 189780,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4db",
+      "tickIdx": 189840,
+      "liquidity": "392952825806015",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4dc",
+      "tickIdx": 189900,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4dd",
+      "tickIdx": 189960,
+      "liquidity": "1901904348187082",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4de",
+      "tickIdx": 190020,
+      "liquidity": "19669246498369516",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4df",
+      "tickIdx": 190080,
+      "liquidity": "9841677689756367",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e0",
+      "tickIdx": 190140,
+      "liquidity": "10903408395822929",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e1",
+      "tickIdx": 190200,
+      "liquidity": "21893592706213893",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e2",
+      "tickIdx": 190260,
+      "liquidity": "2538929978696267",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e3",
+      "tickIdx": 190320,
+      "liquidity": "681113229928758",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e4",
+      "tickIdx": 190380,
+      "liquidity": "6643438883146167",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e5",
+      "tickIdx": 190440,
+      "liquidity": "1146932639459095",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e6",
+      "tickIdx": 190500,
+      "liquidity": "494628191991616",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e7",
+      "tickIdx": 190560,
+      "liquidity": "24343670142282001",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e8",
+      "tickIdx": 190620,
+      "liquidity": "2148614999868805",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4e9",
+      "tickIdx": 190680,
+      "liquidity": "1735048379720792",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ea",
+      "tickIdx": 190740,
+      "liquidity": "35040467055975693",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4eb",
+      "tickIdx": 190800,
+      "liquidity": "57696977636830420",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ec",
+      "tickIdx": 190860,
+      "liquidity": "90302352612655591",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ed",
+      "tickIdx": 190920,
+      "liquidity": "15413440365617321",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ee",
+      "tickIdx": 190980,
+      "liquidity": "15456418501316639",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ef",
+      "tickIdx": 191040,
+      "liquidity": "5502150801727508",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f0",
+      "tickIdx": 191100,
+      "liquidity": "163169132038363474",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f1",
+      "tickIdx": 191160,
+      "liquidity": "239896011256994777",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f2",
+      "tickIdx": 191220,
+      "liquidity": "7293182216815228",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f3",
+      "tickIdx": 191280,
+      "liquidity": "3112162839816119",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f4",
+      "tickIdx": 191340,
+      "liquidity": "2351147356798906",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f5",
+      "tickIdx": 191400,
+      "liquidity": "324203183582768",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f6",
+      "tickIdx": 191460,
+      "liquidity": "3050219618144105",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f7",
+      "tickIdx": 191520,
+      "liquidity": "1101140520225257",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f8",
+      "tickIdx": 191580,
+      "liquidity": "9333482025768467",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4f9",
+      "tickIdx": 191640,
+      "liquidity": "946675086966663",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4fa",
+      "tickIdx": 191700,
+      "liquidity": "2543414050006757",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4fb",
+      "tickIdx": 191760,
+      "liquidity": "8533703091958354",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4fc",
+      "tickIdx": 191820,
+      "liquidity": "34158131284178470",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4fd",
+      "tickIdx": 191880,
+      "liquidity": "1630814096299581",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4fe",
+      "tickIdx": 191940,
+      "liquidity": "68312365703179072",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c4ff",
+      "tickIdx": 192000,
+      "liquidity": "8300058271097853",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c500",
+      "tickIdx": 192060,
+      "liquidity": "485872276661255849",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c501",
+      "tickIdx": 192120,
+      "liquidity": "7502377036494205",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c502",
+      "tickIdx": 192180,
+      "liquidity": "363884842703247208",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c503",
+      "tickIdx": 192240,
+      "liquidity": "1140072679140656",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c504",
+      "tickIdx": 192300,
+      "liquidity": "1829777347391018",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c505",
+      "tickIdx": 192360,
+      "liquidity": "1156286352640155",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c506",
+      "tickIdx": 192420,
+      "liquidity": "216330886052108474",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c507",
+      "tickIdx": 192480,
+      "liquidity": "18481289760005781",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c508",
+      "tickIdx": 192540,
+      "liquidity": "36368497442344220",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c509",
+      "tickIdx": 192600,
+      "liquidity": "3666614348886543",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c50a",
+      "tickIdx": 192660,
+      "liquidity": "6715635855715182",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c50b",
+      "tickIdx": 192720,
+      "liquidity": "184243298141716633",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c50c",
+      "tickIdx": 192780,
+      "liquidity": "259587214246141762",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c50d",
+      "tickIdx": 192840,
+      "liquidity": "29685238118079723",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c50e",
+      "tickIdx": 192900,
+      "liquidity": "42717454247686204",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c50f",
+      "tickIdx": 192960,
+      "liquidity": "32635972189664502",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c510",
+      "tickIdx": 193020,
+      "liquidity": "10289599333826833",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c511",
+      "tickIdx": 193080,
+      "liquidity": "14581042436642107",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c512",
+      "tickIdx": 193140,
+      "liquidity": "102690803513002173",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c513",
+      "tickIdx": 193200,
+      "liquidity": "96007963004193225",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c514",
+      "tickIdx": 193260,
+      "liquidity": "48431046205684753",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c515",
+      "tickIdx": 193320,
+      "liquidity": "61489054487672558",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c516",
+      "tickIdx": 193380,
+      "liquidity": "893947915891252405",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c517",
+      "tickIdx": 193440,
+      "liquidity": "200175663380438839",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c518",
+      "tickIdx": 193500,
+      "liquidity": "24184315596025489",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c519",
+      "tickIdx": 193560,
+      "liquidity": "2224694150662185",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c51a",
+      "tickIdx": 193620,
+      "liquidity": "115804279274273867",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c51b",
+      "tickIdx": 193680,
+      "liquidity": "16397285194111311",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c51c",
+      "tickIdx": 193740,
+      "liquidity": "51057402685976176",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c51d",
+      "tickIdx": 193800,
+      "liquidity": "12954295933774695",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c51e",
+      "tickIdx": 193860,
+      "liquidity": "108759971017975956",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c51f",
+      "tickIdx": 193920,
+      "liquidity": "198532196100015761",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c520",
+      "tickIdx": 193980,
+      "liquidity": "64235621447140792",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c521",
+      "tickIdx": 194040,
+      "liquidity": "18579999117398011",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c522",
+      "tickIdx": 194100,
+      "liquidity": "212923361598300844",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c523",
+      "tickIdx": 194160,
+      "liquidity": "392746401788472454",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c524",
+      "tickIdx": 194220,
+      "liquidity": "19331119147139786",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c525",
+      "tickIdx": 194280,
+      "liquidity": "137983509632600772",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c526",
+      "tickIdx": 194340,
+      "liquidity": "71992094257942116",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c527",
+      "tickIdx": 194400,
+      "liquidity": "21823051652713634",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c528",
+      "tickIdx": 194460,
+      "liquidity": "207872970620833347",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c529",
+      "tickIdx": 194520,
+      "liquidity": "75862453865503106",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c52a",
+      "tickIdx": 194580,
+      "liquidity": "11086755651933718",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c52b",
+      "tickIdx": 194640,
+      "liquidity": "183058832542926321",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c52c",
+      "tickIdx": 194700,
+      "liquidity": "915078819508849560",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c52d",
+      "tickIdx": 194760,
+      "liquidity": "119013024934609049",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c52e",
+      "tickIdx": 194820,
+      "liquidity": "222461371257894350",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c52f",
+      "tickIdx": 194880,
+      "liquidity": "298703882158418046",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c530",
+      "tickIdx": 194940,
+      "liquidity": "238778200795956568",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c531",
+      "tickIdx": 195000,
+      "liquidity": "1063499507526118474",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c532",
+      "tickIdx": 195060,
+      "liquidity": "114055835897748172",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c533",
+      "tickIdx": 195120,
+      "liquidity": "24462282741582471",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c534",
+      "tickIdx": 195180,
+      "liquidity": "600018989519322971",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c535",
+      "tickIdx": 195240,
+      "liquidity": "374871144812994940",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c536",
+      "tickIdx": 195300,
+      "liquidity": "11114244378897142610",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c537",
+      "tickIdx": 195360,
+      "liquidity": "42875891599378280",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c538",
+      "tickIdx": 195420,
+      "liquidity": "347746355954764138",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c539",
+      "tickIdx": 195480,
+      "liquidity": "1438884019359212636",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c53a",
+      "tickIdx": 195540,
+      "liquidity": "1393379092276030990",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c53b",
+      "tickIdx": 195600,
+      "liquidity": "334249708595027069",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c53c",
+      "tickIdx": 195660,
+      "liquidity": "1779633421104063874",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c53d",
+      "tickIdx": 195720,
+      "liquidity": "633652915563957240",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c53e",
+      "tickIdx": 195780,
+      "liquidity": "280367503296894456",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c53f",
+      "tickIdx": 195840,
+      "liquidity": "506992953232698539",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c540",
+      "tickIdx": 195900,
+      "liquidity": "333202259466849825",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c541",
+      "tickIdx": 195960,
+      "liquidity": "56195124021914852",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c542",
+      "tickIdx": 196020,
+      "liquidity": "8953344270165495600",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c543",
+      "tickIdx": 196080,
+      "liquidity": "182458150463491196",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c544",
+      "tickIdx": 196140,
+      "liquidity": "201218134659804336",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c545",
+      "tickIdx": 196200,
+      "liquidity": "8165153289809154858",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c546",
+      "tickIdx": 196260,
+      "liquidity": "2081395337000135562",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c547",
+      "tickIdx": 196320,
+      "liquidity": "511501168384454042",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c548",
+      "tickIdx": 196380,
+      "liquidity": "99601667290360404",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c549",
+      "tickIdx": 196440,
+      "liquidity": "672677757204111772",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c54a",
+      "tickIdx": 196500,
+      "liquidity": "208411946581864033",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c54b",
+      "tickIdx": 196560,
+      "liquidity": "720117292661367595",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c54c",
+      "tickIdx": 196620,
+      "liquidity": "12193877754559966581",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c54d",
+      "tickIdx": 196680,
+      "liquidity": "75501760300884735",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c54e",
+      "tickIdx": 196740,
+      "liquidity": "75080867635491170",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c54f",
+      "tickIdx": 196800,
+      "liquidity": "99002665727958375",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c550",
+      "tickIdx": 196860,
+      "liquidity": "36310891997849855",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c551",
+      "tickIdx": 196920,
+      "liquidity": "403653660444448556",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c552",
+      "tickIdx": 196980,
+      "liquidity": "198692227014899246",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c553",
+      "tickIdx": 197040,
+      "liquidity": "106520186488568747",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c554",
+      "tickIdx": 197100,
+      "liquidity": "230187156611405258",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c555",
+      "tickIdx": 197160,
+      "liquidity": "44319551842392994",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c556",
+      "tickIdx": 197220,
+      "liquidity": "71887275277588573",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c557",
+      "tickIdx": 197280,
+      "liquidity": "95385751303836988",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c558",
+      "tickIdx": 197340,
+      "liquidity": "159528833285076441",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c559",
+      "tickIdx": 197400,
+      "liquidity": "94933870677915223",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c55a",
+      "tickIdx": 197460,
+      "liquidity": "32980911127912173",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c55b",
+      "tickIdx": 197520,
+      "liquidity": "150582912160909277",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c55c",
+      "tickIdx": 197580,
+      "liquidity": "29952306159930880",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c55d",
+      "tickIdx": 197640,
+      "liquidity": "216468591009137929",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c55e",
+      "tickIdx": 197700,
+      "liquidity": "231678466619520987",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c55f",
+      "tickIdx": 197760,
+      "liquidity": "88253378727306621",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c560",
+      "tickIdx": 197820,
+      "liquidity": "140519281986757485",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c561",
+      "tickIdx": 197880,
+      "liquidity": "60827172026362076",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c562",
+      "tickIdx": 197940,
+      "liquidity": "29504233655948165",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c563",
+      "tickIdx": 198000,
+      "liquidity": "27210735056248767",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c564",
+      "tickIdx": 198060,
+      "liquidity": "1127481613838884902",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c565",
+      "tickIdx": 198120,
+      "liquidity": "79554712738122770",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c566",
+      "tickIdx": 198180,
+      "liquidity": "44510315195341023",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c567",
+      "tickIdx": 198240,
+      "liquidity": "10944249036992805",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c568",
+      "tickIdx": 198300,
+      "liquidity": "1430234546927321522",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c569",
+      "tickIdx": 198360,
+      "liquidity": "87762282861135001",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c56a",
+      "tickIdx": 198420,
+      "liquidity": "61996386791136179",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c56b",
+      "tickIdx": 198480,
+      "liquidity": "262028896376162266",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c56c",
+      "tickIdx": 198540,
+      "liquidity": "34780609813116236",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c56d",
+      "tickIdx": 198600,
+      "liquidity": "22309284121842769",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c56e",
+      "tickIdx": 198660,
+      "liquidity": "16577462840107167",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c56f",
+      "tickIdx": 198720,
+      "liquidity": "41526677615881047",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c570",
+      "tickIdx": 198780,
+      "liquidity": "102744591968292880",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c571",
+      "tickIdx": 198840,
+      "liquidity": "58548546865380224",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c572",
+      "tickIdx": 198900,
+      "liquidity": "947663195571666764",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c573",
+      "tickIdx": 198960,
+      "liquidity": "48796657731596188",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c574",
+      "tickIdx": 199020,
+      "liquidity": "34787213952523877",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c575",
+      "tickIdx": 199080,
+      "liquidity": "31528127624253624",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c576",
+      "tickIdx": 199140,
+      "liquidity": "258421289123946232",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c577",
+      "tickIdx": 199200,
+      "liquidity": "305703431997995315",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c578",
+      "tickIdx": 199260,
+      "liquidity": "21181698118368440",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c579",
+      "tickIdx": 199320,
+      "liquidity": "38512963201865801",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c57a",
+      "tickIdx": 199380,
+      "liquidity": "87020925488269343",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c57b",
+      "tickIdx": 199440,
+      "liquidity": "21349849852187816",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c57c",
+      "tickIdx": 199500,
+      "liquidity": "9864808515292600",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c57d",
+      "tickIdx": 199560,
+      "liquidity": "25257768150687607",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c57e",
+      "tickIdx": 199620,
+      "liquidity": "37512622011666521",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c57f",
+      "tickIdx": 199680,
+      "liquidity": "218576591624080263",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c580",
+      "tickIdx": 199740,
+      "liquidity": "456052636046995910",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c581",
+      "tickIdx": 199800,
+      "liquidity": "989704769151734570",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c582",
+      "tickIdx": 199860,
+      "liquidity": "249084015381087279",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c583",
+      "tickIdx": 199920,
+      "liquidity": "230924594607994790",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c584",
+      "tickIdx": 199980,
+      "liquidity": "14264746875501758",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c585",
+      "tickIdx": 200040,
+      "liquidity": "132701475158744994",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c586",
+      "tickIdx": 200100,
+      "liquidity": "30175055142162701",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c587",
+      "tickIdx": 200160,
+      "liquidity": "42689870713934643",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c588",
+      "tickIdx": 200220,
+      "liquidity": "323436855296267424",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c589",
+      "tickIdx": 200280,
+      "liquidity": "153281167546938622",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c58a",
+      "tickIdx": 200340,
+      "liquidity": "570109470308823403",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c58b",
+      "tickIdx": 200400,
+      "liquidity": "209194423859289294",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c58c",
+      "tickIdx": 200460,
+      "liquidity": "161794053395562814",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c58d",
+      "tickIdx": 200520,
+      "liquidity": "261648466581301034",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c58e",
+      "tickIdx": 200580,
+      "liquidity": "10889101866830918",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c58f",
+      "tickIdx": 200640,
+      "liquidity": "146263737266182146",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c590",
+      "tickIdx": 200700,
+      "liquidity": "17874075748543574",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c591",
+      "tickIdx": 200760,
+      "liquidity": "454512671149904203",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c592",
+      "tickIdx": 200820,
+      "liquidity": "468101687497013875",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c593",
+      "tickIdx": 200880,
+      "liquidity": "72872708320645972",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c594",
+      "tickIdx": 200940,
+      "liquidity": "49681548301990020",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c595",
+      "tickIdx": 201000,
+      "liquidity": "12085641283466346",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c596",
+      "tickIdx": 201060,
+      "liquidity": "24638211458494226",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c597",
+      "tickIdx": 201120,
+      "liquidity": "57071675335999204",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c598",
+      "tickIdx": 201180,
+      "liquidity": "13502853186291694",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c599",
+      "tickIdx": 201240,
+      "liquidity": "28030889035110938",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c59a",
+      "tickIdx": 201300,
+      "liquidity": "43598940919756081",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c59b",
+      "tickIdx": 201360,
+      "liquidity": "475097736181169599",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c59c",
+      "tickIdx": 201420,
+      "liquidity": "23048350324174050",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c59d",
+      "tickIdx": 201480,
+      "liquidity": "45975654205621634",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c59e",
+      "tickIdx": 201540,
+      "liquidity": "155813260332530247",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c59f",
+      "tickIdx": 201600,
+      "liquidity": "12449439596673310",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a0",
+      "tickIdx": 201660,
+      "liquidity": "36964063160324552",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a1",
+      "tickIdx": 201720,
+      "liquidity": "17432560228557723",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a2",
+      "tickIdx": 201780,
+      "liquidity": "6467849840002432",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a3",
+      "tickIdx": 201840,
+      "liquidity": "82603259632996035",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a4",
+      "tickIdx": 201900,
+      "liquidity": "53434400738609127",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a5",
+      "tickIdx": 201960,
+      "liquidity": "193428081341771434",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a6",
+      "tickIdx": 202020,
+      "liquidity": "194792727149201900",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a7",
+      "tickIdx": 202080,
+      "liquidity": "101648649519768283",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a8",
+      "tickIdx": 202140,
+      "liquidity": "10115063054776682",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5a9",
+      "tickIdx": 202200,
+      "liquidity": "21971258863801954",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5aa",
+      "tickIdx": 202260,
+      "liquidity": "31353176231918162",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ab",
+      "tickIdx": 202320,
+      "liquidity": "1680772042419837",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ac",
+      "tickIdx": 202380,
+      "liquidity": "88789696071099946",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ad",
+      "tickIdx": 202440,
+      "liquidity": "138123511490776194",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ae",
+      "tickIdx": 202500,
+      "liquidity": "6699901058514702",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5af",
+      "tickIdx": 202560,
+      "liquidity": "47527341380649318",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b0",
+      "tickIdx": 202620,
+      "liquidity": "136329584178765795",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b1",
+      "tickIdx": 202680,
+      "liquidity": "214213367867544",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b2",
+      "tickIdx": 202740,
+      "liquidity": "3123905008419815",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b3",
+      "tickIdx": 202800,
+      "liquidity": "1539505722341420",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b4",
+      "tickIdx": 202860,
+      "liquidity": "8361563817033606",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b5",
+      "tickIdx": 202920,
+      "liquidity": "7188010341317210",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b6",
+      "tickIdx": 202980,
+      "liquidity": "90377108677801633",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b7",
+      "tickIdx": 203040,
+      "liquidity": "22418508808978229",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b8",
+      "tickIdx": 203100,
+      "liquidity": "552090047041569",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5b9",
+      "tickIdx": 203160,
+      "liquidity": "874668696524564610",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ba",
+      "tickIdx": 203220,
+      "liquidity": "102006368274624711",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5bb",
+      "tickIdx": 203280,
+      "liquidity": "29302237647450243",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5bc",
+      "tickIdx": 203340,
+      "liquidity": "1001999518541603",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5bd",
+      "tickIdx": 203400,
+      "liquidity": "47026178907967366",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5be",
+      "tickIdx": 203460,
+      "liquidity": "59815088562109209",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5bf",
+      "tickIdx": 203520,
+      "liquidity": "30749592905682045",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c0",
+      "tickIdx": 203580,
+      "liquidity": "340050463657939",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c1",
+      "tickIdx": 203640,
+      "liquidity": "3556887849345565",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c2",
+      "tickIdx": 203700,
+      "liquidity": "3248517865241693",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c3",
+      "tickIdx": 203760,
+      "liquidity": "4822944494781397",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c4",
+      "tickIdx": 203820,
+      "liquidity": "2959399143087724",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c5",
+      "tickIdx": 203880,
+      "liquidity": "122099211334088576",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c6",
+      "tickIdx": 203940,
+      "liquidity": "9369965538747458",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c7",
+      "tickIdx": 204000,
+      "liquidity": "5995688087064334",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c8",
+      "tickIdx": 204060,
+      "liquidity": "6363667332136734",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5c9",
+      "tickIdx": 204120,
+      "liquidity": "222830917473319",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ca",
+      "tickIdx": 204180,
+      "liquidity": "86855091415243377",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5cb",
+      "tickIdx": 204240,
+      "liquidity": "3345624370705056",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5cc",
+      "tickIdx": 204300,
+      "liquidity": "52661080527058",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5cd",
+      "tickIdx": 204360,
+      "liquidity": "75205358380595",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ce",
+      "tickIdx": 204420,
+      "liquidity": "123896679651917705",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5cf",
+      "tickIdx": 204480,
+      "liquidity": "7504172139581881",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d0",
+      "tickIdx": 204540,
+      "liquidity": "25190017655191933",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d1",
+      "tickIdx": 204600,
+      "liquidity": "32467247932032958",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d2",
+      "tickIdx": 204660,
+      "liquidity": "24174379987908964",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d3",
+      "tickIdx": 204720,
+      "liquidity": "195747949944563",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d4",
+      "tickIdx": 204780,
+      "liquidity": "1493642654570437",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d5",
+      "tickIdx": 204840,
+      "liquidity": "3519858695956631",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d6",
+      "tickIdx": 204900,
+      "liquidity": "4453441573720576",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d7",
+      "tickIdx": 204960,
+      "liquidity": "68368510417213974",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d8",
+      "tickIdx": 205020,
+      "liquidity": "29176349801317704",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5d9",
+      "tickIdx": 205080,
+      "liquidity": "43078102586779",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5da",
+      "tickIdx": 205140,
+      "liquidity": "1191509424286783",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5db",
+      "tickIdx": 205200,
+      "liquidity": "1258329569554979",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5dc",
+      "tickIdx": 205260,
+      "liquidity": "5174023223069",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5dd",
+      "tickIdx": 205320,
+      "liquidity": "156386866626975",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5de",
+      "tickIdx": 205380,
+      "liquidity": "544809563800034",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5df",
+      "tickIdx": 205440,
+      "liquidity": "51414893062854077",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e0",
+      "tickIdx": 205500,
+      "liquidity": "41802568852766166",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e1",
+      "tickIdx": 205560,
+      "liquidity": "1058104390298693",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e2",
+      "tickIdx": 205620,
+      "liquidity": "8227782143467215",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e3",
+      "tickIdx": 205680,
+      "liquidity": "957710714218911",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e4",
+      "tickIdx": 205740,
+      "liquidity": "25412356978687486",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e5",
+      "tickIdx": 205800,
+      "liquidity": "1316538387789182",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e6",
+      "tickIdx": 205860,
+      "liquidity": "898739688036321",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e7",
+      "tickIdx": 205920,
+      "liquidity": "7960119058779714",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e8",
+      "tickIdx": 205980,
+      "liquidity": "144319952714460",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5e9",
+      "tickIdx": 206040,
+      "liquidity": "15910818056957",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ea",
+      "tickIdx": 206100,
+      "liquidity": "539066620899263260",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5eb",
+      "tickIdx": 206160,
+      "liquidity": "1362323362449693",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ec",
+      "tickIdx": 206220,
+      "liquidity": "758270183443273",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ed",
+      "tickIdx": 206280,
+      "liquidity": "12090651210003742",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ee",
+      "tickIdx": 206340,
+      "liquidity": "53939817815634701",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ef",
+      "tickIdx": 206400,
+      "liquidity": "967419711387265",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f0",
+      "tickIdx": 206460,
+      "liquidity": "5343428574458",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f1",
+      "tickIdx": 206520,
+      "liquidity": "1611529443020937",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f2",
+      "tickIdx": 206580,
+      "liquidity": "734099830913516",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f3",
+      "tickIdx": 206640,
+      "liquidity": "52673183350353",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f4",
+      "tickIdx": 206700,
+      "liquidity": "360109702575280",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f5",
+      "tickIdx": 206760,
+      "liquidity": "1498715245163338",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f6",
+      "tickIdx": 206820,
+      "liquidity": "3077704092779658",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f7",
+      "tickIdx": 206880,
+      "liquidity": "10804631043819",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f8",
+      "tickIdx": 206940,
+      "liquidity": "464818548015738",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5f9",
+      "tickIdx": 207000,
+      "liquidity": "16975168644607",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5fa",
+      "tickIdx": 207060,
+      "liquidity": "16455537764582",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5fb",
+      "tickIdx": 207120,
+      "liquidity": "1559971870244329",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5fc",
+      "tickIdx": 207180,
+      "liquidity": "1047260076137803",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5fd",
+      "tickIdx": 207240,
+      "liquidity": "759096796107392321",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5fe",
+      "tickIdx": 207300,
+      "liquidity": "9271633596166433",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c5ff",
+      "tickIdx": 207360,
+      "liquidity": "36071223318403110",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c600",
+      "tickIdx": 207420,
+      "liquidity": "14933975177914169",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c601",
+      "tickIdx": 207480,
+      "liquidity": "19207399946219236",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c602",
+      "tickIdx": 207540,
+      "liquidity": "6156519598626253",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c603",
+      "tickIdx": 207600,
+      "liquidity": "3504569194524034",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c604",
+      "tickIdx": 207660,
+      "liquidity": "9480464805474753",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c605",
+      "tickIdx": 207720,
+      "liquidity": "2570459888907763",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c606",
+      "tickIdx": 207780,
+      "liquidity": "2085495728493096",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c607",
+      "tickIdx": 207840,
+      "liquidity": "7672290354572278",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c608",
+      "tickIdx": 207900,
+      "liquidity": "88247198165946",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c609",
+      "tickIdx": 207960,
+      "liquidity": "4488109783025",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c60a",
+      "tickIdx": 208020,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c60b",
+      "tickIdx": 208080,
+      "liquidity": "169186222072138",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c60c",
+      "tickIdx": 208140,
+      "liquidity": "3729526705922246",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c60d",
+      "tickIdx": 208200,
+      "liquidity": "5606238079072",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c60e",
+      "tickIdx": 208260,
+      "liquidity": "91043966144245200",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c60f",
+      "tickIdx": 208320,
+      "liquidity": "3766872614249297",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c610",
+      "tickIdx": 208380,
+      "liquidity": "779330294041",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c611",
+      "tickIdx": 208440,
+      "liquidity": "61786723866686",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c612",
+      "tickIdx": 208500,
+      "liquidity": "9620901544554778",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c613",
+      "tickIdx": 208560,
+      "liquidity": "69916499663861",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c614",
+      "tickIdx": 208620,
+      "liquidity": "3597411139032747",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c615",
+      "tickIdx": 208680,
+      "liquidity": "3358720858773342",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c616",
+      "tickIdx": 208740,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c617",
+      "tickIdx": 208800,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c618",
+      "tickIdx": 208860,
+      "liquidity": "931767770211807",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c619",
+      "tickIdx": 208980,
+      "liquidity": "448900777828588",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c61a",
+      "tickIdx": 209040,
+      "liquidity": "19325033511965",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c61b",
+      "tickIdx": 209100,
+      "liquidity": "316874206147974",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c61c",
+      "tickIdx": 209220,
+      "liquidity": "83308410472559",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c61d",
+      "tickIdx": 209280,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c61e",
+      "tickIdx": 209340,
+      "liquidity": "1158325045397942",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c61f",
+      "tickIdx": 209400,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c620",
+      "tickIdx": 209460,
+      "liquidity": "75848357545656164",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c621",
+      "tickIdx": 209520,
+      "liquidity": "370210246145470",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c622",
+      "tickIdx": 209580,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c623",
+      "tickIdx": 209640,
+      "liquidity": "24219382707540",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c624",
+      "tickIdx": 209700,
+      "liquidity": "49999492742827160",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c625",
+      "tickIdx": 209760,
+      "liquidity": "177275598648494",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c626",
+      "tickIdx": 209820,
+      "liquidity": "883334186169475",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c627",
+      "tickIdx": 209880,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c628",
+      "tickIdx": 210060,
+      "liquidity": "248894153710079",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c629",
+      "tickIdx": 210120,
+      "liquidity": "3185202321886369",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c62a",
+      "tickIdx": 210180,
+      "liquidity": "6788897270458393",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c62b",
+      "tickIdx": 210360,
+      "liquidity": "628663076512",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c62c",
+      "tickIdx": 210480,
+      "liquidity": "258968976026349",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c62d",
+      "tickIdx": 210540,
+      "liquidity": "56459563400149",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c62e",
+      "tickIdx": 210600,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c62f",
+      "tickIdx": 210780,
+      "liquidity": "485103290277351",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c630",
+      "tickIdx": 210840,
+      "liquidity": "45620252674737",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c631",
+      "tickIdx": 210900,
+      "liquidity": "2392839373140143",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c632",
+      "tickIdx": 210960,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c633",
+      "tickIdx": 211020,
+      "liquidity": "4168003884430134",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c634",
+      "tickIdx": 211080,
+      "liquidity": "16619606807603",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c635",
+      "tickIdx": 211140,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c636",
+      "tickIdx": 211200,
+      "liquidity": "24884956789870",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c637",
+      "tickIdx": 211260,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c638",
+      "tickIdx": 211320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c639",
+      "tickIdx": 211380,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c63a",
+      "tickIdx": 211440,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c63b",
+      "tickIdx": 211500,
+      "liquidity": "893749123998279",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c63c",
+      "tickIdx": 211560,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c63d",
+      "tickIdx": 211620,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c63e",
+      "tickIdx": 211680,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c63f",
+      "tickIdx": 211740,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c640",
+      "tickIdx": 211800,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c641",
+      "tickIdx": 211860,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c642",
+      "tickIdx": 211920,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c643",
+      "tickIdx": 211980,
+      "liquidity": "1168139711341188",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c644",
+      "tickIdx": 212040,
+      "liquidity": "3361536958600256",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c645",
+      "tickIdx": 212220,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c646",
+      "tickIdx": 212340,
+      "liquidity": "115941409873225179",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c647",
+      "tickIdx": 212820,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c648",
+      "tickIdx": 212880,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c649",
+      "tickIdx": 213120,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c64a",
+      "tickIdx": 213180,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c64b",
+      "tickIdx": 213240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c64c",
+      "tickIdx": 213420,
+      "liquidity": "2553245826331681",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c64d",
+      "tickIdx": 213540,
+      "liquidity": "335263303760328",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c64e",
+      "tickIdx": 213720,
+      "liquidity": "3354880214402",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c64f",
+      "tickIdx": 213780,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c650",
+      "tickIdx": 213840,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c651",
+      "tickIdx": 213960,
+      "liquidity": "779084594326922",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c652",
+      "tickIdx": 214080,
+      "liquidity": "23434708588618",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c653",
+      "tickIdx": 214140,
+      "liquidity": "1959059621216698",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c654",
+      "tickIdx": 214200,
+      "liquidity": "4576848677456846",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c655",
+      "tickIdx": 214260,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c656",
+      "tickIdx": 214320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c657",
+      "tickIdx": 214440,
+      "liquidity": "86452793006663",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c658",
+      "tickIdx": 214500,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c659",
+      "tickIdx": 214560,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c65a",
+      "tickIdx": 214800,
+      "liquidity": "7667937501739617",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c65b",
+      "tickIdx": 214920,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c65c",
+      "tickIdx": 215220,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c65d",
+      "tickIdx": 215280,
+      "liquidity": "82572241773119",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c65e",
+      "tickIdx": 215460,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c65f",
+      "tickIdx": 215520,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c660",
+      "tickIdx": 215580,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c661",
+      "tickIdx": 215880,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c662",
+      "tickIdx": 215940,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c663",
+      "tickIdx": 216060,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c664",
+      "tickIdx": 216180,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c665",
+      "tickIdx": 216360,
+      "liquidity": "4127014657534434",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c666",
+      "tickIdx": 216420,
+      "liquidity": "31359275667298904",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c667",
+      "tickIdx": 216720,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c668",
+      "tickIdx": 216780,
+      "liquidity": "40665245764266",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c669",
+      "tickIdx": 217620,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c66a",
+      "tickIdx": 217740,
+      "liquidity": "7953468825711",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c66b",
+      "tickIdx": 217800,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c66c",
+      "tickIdx": 218220,
+      "liquidity": "21608410983059",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c66d",
+      "tickIdx": 218280,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c66e",
+      "tickIdx": 218940,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c66f",
+      "tickIdx": 219120,
+      "liquidity": "8032442006248978",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c670",
+      "tickIdx": 219240,
+      "liquidity": "23083853964003",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c671",
+      "tickIdx": 219300,
+      "liquidity": "1866079352002505",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c672",
+      "tickIdx": 220380,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c673",
+      "tickIdx": 220680,
+      "liquidity": "609603054803531",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c674",
+      "tickIdx": 220740,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c675",
+      "tickIdx": 221100,
+      "liquidity": "186276762488299",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c676",
+      "tickIdx": 222060,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c677",
+      "tickIdx": 222240,
+      "liquidity": "7048001149862504",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c678",
+      "tickIdx": 222480,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c679",
+      "tickIdx": 222600,
+      "liquidity": "4808657253404",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c67a",
+      "tickIdx": 222960,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c67b",
+      "tickIdx": 223140,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c67c",
+      "tickIdx": 223320,
+      "liquidity": "1230797276797537",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c67d",
+      "tickIdx": 223380,
+      "liquidity": "15232911461938",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c67e",
+      "tickIdx": 224700,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c67f",
+      "tickIdx": 225840,
+      "liquidity": "2913328770381",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c680",
+      "tickIdx": 226200,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c681",
+      "tickIdx": 228240,
+      "liquidity": "1442677549074",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c682",
+      "tickIdx": 228300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c683",
+      "tickIdx": 228480,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c684",
+      "tickIdx": 229260,
+      "liquidity": "52040557710",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c685",
+      "tickIdx": 229320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c686",
+      "tickIdx": 230220,
+      "liquidity": "20318575228463065",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c687",
+      "tickIdx": 230280,
+      "liquidity": "25089890132255431",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c688",
+      "tickIdx": 231900,
+      "liquidity": "2459262209958",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c689",
+      "tickIdx": 232500,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c68a",
+      "tickIdx": 235800,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c68b",
+      "tickIdx": 237180,
+      "liquidity": "80906695149997",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c68c",
+      "tickIdx": 241260,
+      "liquidity": "368463335144",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c68d",
+      "tickIdx": 241920,
+      "liquidity": "315386766245284",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c68e",
+      "tickIdx": 242700,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c68f",
+      "tickIdx": 243720,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c690",
+      "tickIdx": 244080,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c691",
+      "tickIdx": 244140,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c692",
+      "tickIdx": 244440,
+      "liquidity": "55368831069002",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c693",
+      "tickIdx": 244560,
+      "liquidity": "541836663071250",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c694",
+      "tickIdx": 244980,
+      "liquidity": "1216378082536",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c695",
+      "tickIdx": 245520,
+      "liquidity": "2276938260528",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c696",
+      "tickIdx": 245760,
+      "liquidity": "19255919433172",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c697",
+      "tickIdx": 246360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c698",
+      "tickIdx": 246720,
+      "liquidity": "438761967803",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c699",
+      "tickIdx": 247740,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c69a",
+      "tickIdx": 249240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c69b",
+      "tickIdx": 249420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c69c",
+      "tickIdx": 251460,
+      "liquidity": "5672962003027284",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c69d",
+      "tickIdx": 253320,
+      "liquidity": "8076709077092",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c69e",
+      "tickIdx": 253500,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c69f",
+      "tickIdx": 260220,
+      "liquidity": "1171083309114",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a0",
+      "tickIdx": 262380,
+      "liquidity": "9931938807614",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a1",
+      "tickIdx": 262440,
+      "liquidity": "42703146548",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a2",
+      "tickIdx": 264300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a3",
+      "tickIdx": 269400,
+      "liquidity": "2424473171916",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a4",
+      "tickIdx": 270000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a5",
+      "tickIdx": 275520,
+      "liquidity": "4191798696142",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a6",
+      "tickIdx": 276180,
+      "liquidity": "1660753805745486",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a7",
+      "tickIdx": 276240,
+      "liquidity": "575148691990029321",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a8",
+      "tickIdx": 276300,
+      "liquidity": "577864147332945107",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6a9",
+      "tickIdx": 276360,
+      "liquidity": "386838158255188",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6aa",
+      "tickIdx": 276420,
+      "liquidity": "86340378137",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ab",
+      "tickIdx": 277260,
+      "liquidity": "4191798696142",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ac",
+      "tickIdx": 277380,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ad",
+      "tickIdx": 278580,
+      "liquidity": "1990574053993",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ae",
+      "tickIdx": 283260,
+      "liquidity": "123382090231198",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6af",
+      "tickIdx": 292440,
+      "liquidity": "57789211473592",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b0",
+      "tickIdx": 295080,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b1",
+      "tickIdx": 299340,
+      "liquidity": "94745680238686",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b2",
+      "tickIdx": 309060,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b3",
+      "tickIdx": 309300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b4",
+      "tickIdx": 322380,
+      "liquidity": "50602192969252",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b5",
+      "tickIdx": 328860,
+      "liquidity": "2074343196363",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b6",
+      "tickIdx": 336240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b7",
+      "tickIdx": 338460,
+      "liquidity": "65341053987562",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b8",
+      "tickIdx": 343200,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6b9",
+      "tickIdx": 343560,
+      "liquidity": "1623617003501301",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ba",
+      "tickIdx": 344220,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6bb",
+      "tickIdx": 344340,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6bc",
+      "tickIdx": 345420,
+      "liquidity": "1634088251132949",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6bd",
+      "tickIdx": 348000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6be",
+      "tickIdx": 349440,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6bf",
+      "tickIdx": 350400,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c0",
+      "tickIdx": 350700,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c1",
+      "tickIdx": 350760,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c2",
+      "tickIdx": 351300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c3",
+      "tickIdx": 351420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c4",
+      "tickIdx": 351540,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c5",
+      "tickIdx": 352020,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c6",
+      "tickIdx": 352080,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c7",
+      "tickIdx": 352320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c8",
+      "tickIdx": 352380,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6c9",
+      "tickIdx": 352800,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ca",
+      "tickIdx": 353280,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6cb",
+      "tickIdx": 353340,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6cc",
+      "tickIdx": 353400,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6cd",
+      "tickIdx": 353460,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ce",
+      "tickIdx": 353820,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6cf",
+      "tickIdx": 353940,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d0",
+      "tickIdx": 354000,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d1",
+      "tickIdx": 354300,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d2",
+      "tickIdx": 354360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d3",
+      "tickIdx": 354660,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d4",
+      "tickIdx": 354780,
+      "liquidity": "300529832802280774",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d5",
+      "tickIdx": 354960,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d6",
+      "tickIdx": 355080,
+      "liquidity": "300529832802280774",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d7",
+      "tickIdx": 355200,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d8",
+      "tickIdx": 355320,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6d9",
+      "tickIdx": 355440,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6da",
+      "tickIdx": 355560,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6db",
+      "tickIdx": 355680,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6dc",
+      "tickIdx": 356220,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6dd",
+      "tickIdx": 356580,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6de",
+      "tickIdx": 356760,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6df",
+      "tickIdx": 356880,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e0",
+      "tickIdx": 357360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e1",
+      "tickIdx": 357600,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e2",
+      "tickIdx": 357660,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e3",
+      "tickIdx": 357780,
+      "liquidity": "1030546250225582612",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e4",
+      "tickIdx": 357840,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e5",
+      "tickIdx": 357900,
+      "liquidity": "1030546250225582612",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e6",
+      "tickIdx": 357960,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e7",
+      "tickIdx": 358020,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e8",
+      "tickIdx": 358260,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6e9",
+      "tickIdx": 358620,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ea",
+      "tickIdx": 359040,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6eb",
+      "tickIdx": 359220,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ec",
+      "tickIdx": 359280,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ed",
+      "tickIdx": 359340,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ee",
+      "tickIdx": 359520,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ef",
+      "tickIdx": 359760,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f0",
+      "tickIdx": 360240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f1",
+      "tickIdx": 360420,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f2",
+      "tickIdx": 360540,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f3",
+      "tickIdx": 361500,
+      "liquidity": "123130265461154",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f4",
+      "tickIdx": 362880,
+      "liquidity": "4036284063306",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f5",
+      "tickIdx": 363660,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f6",
+      "tickIdx": 365580,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f7",
+      "tickIdx": 365940,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f8",
+      "tickIdx": 366180,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6f9",
+      "tickIdx": 366240,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6fa",
+      "tickIdx": 367260,
+      "liquidity": "5032173446544",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6fb",
+      "tickIdx": 368460,
+      "liquidity": "4962927755868",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6fc",
+      "tickIdx": 375360,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6fd",
+      "tickIdx": 376680,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6fe",
+      "tickIdx": 384540,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c6ff",
+      "tickIdx": 391440,
+      "liquidity": "29855546490984",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c700",
+      "tickIdx": 398400,
+      "liquidity": "476728711924",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c701",
+      "tickIdx": 405180,
+      "liquidity": "48582531040449",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c702",
+      "tickIdx": 414480,
+      "liquidity": "6876661403666117",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c703",
+      "tickIdx": 483540,
+      "liquidity": "439049627017196",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c704",
+      "tickIdx": 552960,
+      "liquidity": "0",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c705",
+      "tickIdx": 598680,
+      "liquidity": "9808405604303",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    },
+    {
+      "_id": "6115304018fc3d26b413c706",
+      "tickIdx": 887220,
+      "liquidity": "72327780168830",
+      "feeGrowthInside0X": "0",
+      "feeGrowthInside1X": "0"
+    }
+  ],
+  "pool": "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8",
+  "price": "195908"
+}

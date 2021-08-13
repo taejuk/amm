@@ -1,24 +1,14 @@
 import {
   FeeAmount,
-  FullMath,
-  isSorted,
-  LiquidityMath,
-  Pool,
-  Tick,
-  TickList,
   TickMath,
-  TICK_SPACINGS,
 } from "@uniswap/v3-sdk";
-import { Token } from "@uniswap/sdk-core";
 import { BigintIsh } from "@uniswap/sdk-core";
-import invariant from "tiny-invariant";
 
 import axios from "axios";
-import { SwapMath } from "./swapMath";
 
 import JSBI from "jsbi";
-import Web3 from "web3";
 import fs from "fs";
+import { blockNumberToTimestamp, SwapMath, toWei } from "./utils";
 const NEGATIVE_ONE = JSBI.BigInt(-1);
 const ZERO = JSBI.BigInt(0);
 const ONE = JSBI.BigInt(1);
@@ -27,9 +17,6 @@ const ONE = JSBI.BigInt(1);
 const Q96 = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(96));
 const Q192 = JSBI.exponentiate(Q96, JSBI.BigInt(2));
 const Q128 = JSBI.BigInt("0x100000000000000000000000000000000");
-const web3 = new Web3(
-  "https://mainnet.infura.io/v3/aaa10d98f1d144ca8d1c9d3b64e506fd"
-);
 interface TickConstructorArgs {
   index: number;
   liquidityGross: BigintIsh;
@@ -116,13 +103,6 @@ async function getTicks(blockNumber: number) {
   return results;
 }
 
-async function blockNumberToTimestamp(blockNumber: number) {
-  const block = await web3.eth.getBlock(blockNumber);
-  return block.timestamp;
-}
-// swap, mints, burn 이벤트를 시간 순으로 정렬한다.
-// 12994010
-// 12994604
 async function getEvents(startBlockNumber: number, endBlockNumber: number) {
   const startTimestamp = await blockNumberToTimestamp(startBlockNumber);
   const endTimestamp = await blockNumberToTimestamp(endBlockNumber);
@@ -196,8 +176,8 @@ async function getEvents(startBlockNumber: number, endBlockNumber: number) {
   const swaps = swapsResult.data.data.swaps.map((swap: any) => ({
     timestamp: Number(swap.timestamp),
     tick: Number(swap.tick),
-    amount0: web3.utils.toWei(swap.amount0, "picoether"),
-    amount1: web3.utils.toWei(swap.amount1),
+    amount0: toWei(swap.amount0, "picoether"),
+    amount1: toWei(swap.amount1),
     sqrtPriceX96: swap.sqrtPriceX96,
     type: "swap",
   }));
@@ -257,8 +237,8 @@ function findTickIdx(curTick: number, ticks: tickResult[]): number {
 }
 
 async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
-  let ticks = await getTicks(startBlockNumber);
-  let pool = await getPool(startBlockNumber);
+  let ticks = await getTicks(startBlockNumber - 1);
+  let pool = await getPool(startBlockNumber - 1);
   let liquidity = JSBI.BigInt(pool.liquidity);
   const events = await getEvents(startBlockNumber, endBlockNumber);
   for (let event of events) {
@@ -348,9 +328,9 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
         ? JSBI.BigInt(event.amount0)
         : JSBI.BigInt(event.amount1);
       let curTickIdx = findTickIdx(curTick, ticks);
-      console.log(zeroForOne);
+      //console.log(zeroForOne);
       while (amounts.toString() !== "0") {
-        let liquidity = JSBI.BigInt(ticks[curTickIdx].liquidityGross);
+        //let liquidity = JSBI.BigInt(ticks[curTickIdx].liquidityGross);
         let nextTickIdx = findNextTick(curTick, ticks, zeroForOne);
         let sqrtPriceNextX96 = TickMath.getSqrtRatioAtTick(
           ticks[nextTickIdx].tick
@@ -417,4 +397,3 @@ async function calculateFees(startBlockNumber: number, endBlockNumber: number) {
     }
   );
 }
-calculateFees(12999114, 13002308);
