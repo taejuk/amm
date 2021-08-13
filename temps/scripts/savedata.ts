@@ -413,10 +413,56 @@ export async function saveData() {
 
     await newdata.save((err, data) => {
       {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("save ", data.id);
+          query: getPoolQuery({
+              id: ID,
+              blockNumber: await getCurrentBlock()-30,
+          })
+    });
+    //console.log("pool data: ", poolData);
+    //let startblock = pooldata.data.data.pools[0].createdAtBlockNumber;
+    let startTime = parseInt( pooldata.data.data.pools[0].createdAtTimestamp);
+    //const endTime = parseInt(curTime());
+    const endTime = 1628789000;
+
+    //첫 24시간은 데이터가 없으니까 생략
+    startTime += 86400;
+    let startblock = await timestampToBlockNumber(startTime);
+    //console.log("start Block: ", startblock);
+    //console.log("start time : ", startTime);
+    //console.log("my time:", new Date(startTime*1000));
+    //console.log("next Block: ", startblock);
+
+    while(startTime < endTime - 86400){
+      const nextTime = startTime + 86400;
+      console.log("nt: " , nextTime);
+      const nextBlock = await timestampToBlockNumber(nextTime);
+      console.log("nb: " , nextBlock);
+      const tickFeeList = await calculateFees(startblock, nextBlock);
+
+      const endPool = await getPool(nextBlock);
+      const startPool = await getPool(startblock);
+      //console.log("pool data ", endPool);
+      const newdata = new BlockDatas({
+        startBlockNumner : startblock,
+        startTime: new Date(startTime*1000),
+        endBlockNumber: nextBlock,
+        endTime: new Date(nextTime*1000),
+        pool: ID,
+        price: endPool.tick,
+        sqrtPrice: endPool.sqrtPrice,
+        startBlockLiquidity : startPool.liquidity,
+        endBlockLiquidity: endPool.liquidity,
+        tickFees: tickFeeList,
+      });
+      //console.log(newdata);
+
+      await newdata.save((err, data)=>{
+        {
+          if(err){
+              console.log(err);
+          } else{
+              console.log("save ", data.id);
+          }
         }
       }
     });
