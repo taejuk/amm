@@ -26,11 +26,11 @@ export interface poolResult {
     tick: number;
 }
 
-type Result = {
-    liquidity: BigintIsh;
-    feeGrowthInside0X: BigintIsh;
-    feeGrowthInside1X: BigintIsh;
-};
+// type Result = {
+//     liquidity: BigintIsh;
+//     feeGrowthInside0X: BigintIsh;
+//     feeGrowthInside1X: BigintIsh;
+// };
 
 interface TickFee {
   tickIdx: Number,
@@ -332,6 +332,7 @@ const blockData = new mongoose.Schema({
     endTime: 'string',
     pool: 'string',
     price: 'string',
+    sqrtPrice: 'string',
     startBlockLiquidity : 'string',
     endBlockLiquidity: 'string',
     //start time, end time
@@ -399,6 +400,7 @@ export async function saveData(){
         endTime: new Date(nextTime*1000),
         pool: ID,
         price: endPool.tick,
+        sqrtPrice: endPool.sqrtPrice,
         startBlockLiquidity : startPool.liquidity,
         endBlockLiquidity: endPool.liquidity,
         tickFees: tickFeeList,
