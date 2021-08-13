@@ -8,6 +8,9 @@ const main = async () => {
     //const endTimestamp = await blockNumberToTimestamp(13002500);
 
     await saveData();
+    const data = await calculateFees(13002304, 13002500);
+    console.log(data)
+
 }
 
 main();
