@@ -54,10 +54,18 @@ contract myVault is IERC20 {
     }
 
     PositionInfo public position;
+    bool unlocked;
 
     modifier onlyFactory(){
         require(msg.sender == factory, "not Factory");
         _;
+    }
+
+    modifier lock() {
+        require(unlocked, 'locked');
+        unlocked = false;
+        _;
+        unlocked = true;
     }
     
     /**
@@ -71,6 +79,8 @@ contract myVault is IERC20 {
         pool = IUniswapV3Pool(_pool);
         fee = _fee;
         stratgy = _stratgy;
+
+        unlocked = true;
 
         totalSupply = 0;
         //to calculate liquidity
@@ -126,13 +136,6 @@ contract myVault is IERC20 {
         previousTime = now;
 
 
-    }
-
-
-    function addDecimal() internal returns (uint256 result){
-        uint8 decimal0 = token0.decimals();
-        uint8 decimal1 = token1.decimals();
-        result = add(decimal0, decimal1);
     }
 
     ///@notice update position fee using IUniswapV3Pool.burn with zero liquidity
