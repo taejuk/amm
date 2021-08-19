@@ -11,5 +11,9 @@
   "devDependencies": {
     "hardhat": "^2.6.0",
     "truffle": "^5.4.5"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@uniswap/v3-periphery": "^1.1.1"
   }
 }
