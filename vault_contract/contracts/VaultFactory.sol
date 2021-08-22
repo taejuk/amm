@@ -12,7 +12,7 @@ contract vaultFactory {
 
     address public owner;
     
-    event vaultCreate(address vault, int24 fee);
+    event vaultCreate(address vault, uint24 fee);
     
     modifier onlyOwner(){
         require(msg.sender == owner, "not owner");
@@ -27,12 +27,11 @@ contract vaultFactory {
     
     function createVault(
         address _pool,
-        int24 fee,
-        address stratge
-    ) external onlyOwner returns (address vault){
+        uint24 fee
+    ) external onlyOwner payable returns (address vault){
         //중복 방 지
-        require(getVaults(_pool) == address(0));
-        vault = address(new myVault{value: 10000, salt: keccak256(abi.encode(_pool, fee, stratge, address(this)))}(address(this), _pool, fee, stratge));
+        require(getVaults[_pool] == address(0));
+        vault = address(new myVault(address(this), _pool, fee));
         getVaults[_pool] = vault;
         emit vaultCreate(vault, fee);
     }

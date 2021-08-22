@@ -102,9 +102,6 @@ contract myVault is ERC20, IUniswapV3MintCallback
         stratgy = _stratgy;
 
         position.unlocked = true;
-
-        //totalSupply = 0;
-        //to calculate liquidity
     }
     /** 
     * @notice user가 vault에 예치할때 amount 비율 계산해서 토큰 받고 자체 발행 토큰 주고(mint) vault에 토큰 저장
@@ -129,6 +126,7 @@ contract myVault is ERC20, IUniswapV3MintCallback
 
         PositionInfo memory _position = position;
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
+        require(_position.initialized, "uninitialized position");
 
         // (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
         // uint160 sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(_position.tickLower);
@@ -136,8 +134,7 @@ contract myVault is ERC20, IUniswapV3MintCallback
 
         SqrtRatios memory ratios = getRatios(_position);
 
-
-        uint128 liquidity = LiquidityAmounts.getLiquidityForAmounts(
+        uint128 liquidityDelta = LiquidityAmounts.getLiquidityForAmounts(
             ratios.sqrtPriceX96,
             ratios.sqrtRatioAX96,
             ratios.sqrtRatioBX96,
@@ -145,17 +142,16 @@ contract myVault is ERC20, IUniswapV3MintCallback
             amount1Desired
         );
 
+        updatePosition();
+
         //callback 추가
-        (amount0, amount1) = addLiquidity(_positoin.tickLower, _position.tickUpper, liquidity, recipient);
+        tokenAmount = AmountToMint(ratios, _position, addAmount0, addAmount1);
+        _mint(recipient, tokenAmount);
 
-        tokenAmount = mintTokento(recipient, ratios, _position.liquidity, amount0, amount1);
+        (amount0, amount1) = addLiquidity(_position.tickLower, _position.tickUpper, liquidityDelta, recipient);
 
-        //position이 없을때 새로운 포지션 생성
-        if(!_position.initialized){
-            position.initialized = true;
-            position.positionKey = PositionKey.compute(address(this), _position.tickLower, _position.tickUpper);
-        }
-        position.liquidity += liquidity;
+        //update position
+        position.liquidity += liquidityDelta;
 
         require(amount0 > amount0min && amount1 > amount1min, "deposit slippage");
     }
@@ -177,16 +173,11 @@ contract myVault is ERC20, IUniswapV3MintCallback
         uint256 token = _token;
         _burn(recipient, _token);
 
+        //updatePosition();
+
         PositionInfo memory _position = position;
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
         require(_position.liquidity > 0, "not enough liquidity");
-
-        //get prices
-        // (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
-        // uint160 sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(_position.tickLower);
-        // uint160 sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(_position.tickUpper);
-
-        //SqrtRatios memory ratios = getRatios(_position);
 
         //소수점 계산?
         uint128 liquidityDelta = SafeCast.toUint128(mulTokenRate(_position.liquidity, token));
@@ -208,24 +199,25 @@ contract myVault is ERC20, IUniswapV3MintCallback
         );
         position.liquidity -= liquidityDelta;
 
-        // if(_position.liquidity - liquidityDelta == 0){
-        //     position.initialized = false;
-        // }
-
         require(amount0 >= amount0min && amount1 >= amount1min, "withdraw slippage");
         //add event
     }
     
-    function _calcPureFee(
+    function _calcPureInterest(
         PositionInfo memory _position,
         uint128 liquidityDelta
-    ) internal returns(uint256 pureFee0, uint256 pureFee1, uint256 collectAmount0, uint256 collectAmount1){
-        (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
-
+    ) internal returns(
+        uint256 pureInterest0,
+        uint256 pureInterest1,
+        uint256 collectAmount0,
+        uint256 collectAmount1
+    ){
         (collectAmount0, collectAmount1) = pool.burn(_position.tickLower, _position.tickUpper, liquidityDelta);
 
-        pureFee0 = uint256(tokenOwed0) - (collectAmount0);
-        pureFee1 = uint256(tokenOwed1) - (collectAmount1);
+        (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+
+        pureInterest0 = uint256(tokenOwed0) - (collectAmount0);
+        pureInterest1 = uint256(tokenOwed1) - (collectAmount1);
     }
 
     function _calcwithdrawAmount(
@@ -233,10 +225,10 @@ contract myVault is ERC20, IUniswapV3MintCallback
         uint128 liquidityDelta,
         uint256 token
     ) internal returns(uint128 amount0, uint128 amount1){
-        (uint256 pureFee0, uint256 pureFee1, uint256 collectAmount0, uint256 collectAmount1) = _calcPureFee(_position, liquidityDelta);
+        (uint256 pureInterest0, uint256 pureInterest1, uint256 collectAmount0, uint256 collectAmount1) = _calcPureInterest(_position, liquidityDelta);
 
-        uint128 collectFee0 = SafeCast.toUint128(mulTokenRate(pureFee0, token));
-        uint128 collectFee1 = SafeCast.toUint128(mulTokenRate(pureFee1, token));
+        uint128 collectFee0 = SafeCast.toUint128(mulTokenRate(pureInterest0, token));
+        uint128 collectFee1 = SafeCast.toUint128(mulTokenRate(pureInterest1, token));
         
         amount0 = SafeCast.toUint128(collectAmount0) + collectFee0;
         amount1 = SafeCast.toUint128(collectAmount1) + collectFee1;
@@ -268,26 +260,44 @@ contract myVault is ERC20, IUniswapV3MintCallback
     function rebalance(
         int24 tickLower,
         int24 tickUpper,
-        uint256 swapAmount0,
-        uint256 swapAmount1
+        uint256 swapAmount,
+        bool zeroforOne,
+        uint160 sqrtPriceLimitX96
     ) external lock{
+
+        //포지션 그대로면 collect 하고 add liquidity
+        //포지션 존재하면 burn하고 collect하고 새 포지션 생성(mint)
+        //포지션 없으면 변수만 바꾸자
         require(tickLower < tickUpper, "range invalid");
         require(block.timestamp - previousTime > 10000, "rebalance perioud error");
+
+
         previousTime = block.timestamp;
         
         PositionInfo memory _position = position;
+        SqrtRatios memory ratios = getRatios(_position);
+        require(zeroforOne ? 
+        swapAmount < LiquidityAmounts.getAmount0ForLiquidity(ratios.sqrtRatioAX96, ratios.sqrtRatioBX96, _position.liquidity) : 
+        swapAmount < LiquidityAmounts.getAmount1ForLiquidity(ratios.sqrtRatioAX96, ratios.sqrtRatioBX96, _position.liquidity));
 
         /// @dev burn and collect
         //calculate amount from liquidity in position
-
         if(_position.initialized){
-        //get tokenOwed 
-            (uint128 liquidity,,,uint128 tokenOwed0, uint128 tokenOwed1) =
-            pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+            //get tokenOwed 
+            // (,,,uint128 tokenOwed0, uint128 tokenOwed1) =
+            // pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
 
-            pool.burn(_position.tickLower, _position.tickUpper, liquidity);
+            // _burnCollectAll(_position);
 
-            //collect all
+            (uint256 pureInterest0, uint256 pureInterest1,,) = 
+            _calcPureInterest(_position, _position.liquidity);
+
+            //pureFee = tokenowed(fee + burned liquidty) - collectAmount
+            if(fee > 0){
+                uint256 protocolFee0 = FullMath.mulDiv(pureInterest0, fee, 1e6);
+                uint256 protocolFee1 = FullMath.mulDiv(pureInterest1, fee, 1e6);
+            }
+
             (uint128 collect0, uint128 collect1) = pool.collect(
                 address(this),
                 _position.tickLower,
@@ -296,20 +306,54 @@ contract myVault is ERC20, IUniswapV3MintCallback
                 type(uint128).max
             );
 
-            //pureFee = tokenowed(fee + burned liquidty) - collectAmount
-            if(fee > 0){
-                uint128 protocolFee0 = SafeCast.toUint128(FullMath.mulDiv(tokenOwed0, fee, 1e6));
-                uint128 protocolFee1 = SafeCast.toUint128(FullMath.mulDiv(tokenOwed1, fee, 1e6));
+            position.initialized = false;
+
+            if(swapAmount > 0){
+                pool.swap(
+                    address(this),
+                    zeroforOne,
+                    swapAmount,
+                    sqrtPriceLimitX96,
+                    ""
+                );
             }
 
-            //uint128 totalAmount0 = collect0 - protocolFee0;
-            //uint128 totalAmount1 = collect1 - protocolFee1;
-            //swap fee 얼마나오는지 보는건 나중에 인터페이스 뜯어보자. 일단 무지성스왑
+            uint256 amount0 = token0.balanceOf(address(this));
+            uint256 amount1 = token1.balanceOf(address(this));
+
+            amount0 -= protocolFee0;
+            amount1 -= protocolFee1;
+
+            int128 liquidity = LiquidityAmounts.getLiquidityForAmounts(
+                ratios.sqrtPriceX96,
+                ratios.sqrtRatioAX96,
+                ratios.sqrtRatioBX96,
+                amount0,
+                amount1
+            );
 
 
+            (amount0, amount1) = addLiquidity(_position.tickLower, _position.tickUpper, liquidity, address(this));
+            positiion.initialized = true;
+            position.liquidity = liquidity;
+            position.tickLower = tickLower;
+            position.tickUpper = tickUpper;
+            position.positionKey = PositionKey.compute(address(this), tickLower, tickUpper);
         }
     }
 
+    function _burnCollectAll (PositionInfo _position) intrenal returns (uint128 collect0, uint128 collect1) {
+        pool.burn(_position.tickLower, _position.tickUpper, _position.liquidity);
+
+        //collect all
+        (collect0, collect1) = pool.collect(
+            address(this),
+            _position.tickLower,
+            _position.tickUpper,
+            type(uint128).max,
+            type(uint128).max
+        );
+    }
 
     function getRatios(
         PositionInfo memory _position
@@ -334,55 +378,51 @@ contract myVault is ERC20, IUniswapV3MintCallback
         );
     }
 
-    function mintTokento(
-        address recipient,
+    function AmountToMint(
         SqrtRatios memory ratios,
-        uint128 liquidity,
-        uint256 amount0,
-        uint256 amount1
+        PositionInfo _position,
+        uint256 addAmount0,
+        uint256 addAmount1
     ) internal returns (uint256 tokenAmount){
-        (uint256 totalAmount0, uint256 totalAmount1) = LiquidityAmounts.getAmountsForLiquidity(
+        //todo : change tokenowed to pureTokenOwed
+        uint256 _fee = fee;
+        (uint128 liquidity,,,uint128 interest0, uint128 interest1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        if(_fee > 0){
+            interest0 = FullMath.mulDiv(interest0, _fee, 1e6);
+            interest1 = FullMath.mulDiv(interest1, _fee, 1e6);
+        }
+        
+        (uint256 amount0, uint256 amount1) = LiquidityAmounts.getAmountsForLiquidity(
             ratios.sqrtPriceX96,
             ratios.sqrtRatioAX96,
             ratios.sqrtRatioBX96,
             liquidity
         );
 
-        tokenAmount = _calcTokenAmount(amount0, amount1, totalAmount0, totalAmount1);
-        _mint(recipient, tokenAmount);
+        if(this.totalSupply() == 0){
+            tokenAmount = addAmount0 > addAmount1 ? addamount0 : addAmount1;
+        } else if(amount0 == 0 ){
+            tokenAmount = _calcTokentoMint(amount1.add(uint256(interest1)), addAmount1);
+        } else if(amount1 == 0){
+            tokenAmount = _calcTokentoMint(amount0.add(uint256(interest0)), addAmount0);
+        } else {
+            tokenAmount = interest0.mul(amount1) > interest1.mul(amount0) ?
+                _calcTokentoMint(amount0.add(uint256(interest0), addAmount0)) :
+                _calcTokentoMint(amount1.add(uint256(interest1), addAmount1));
+        }
+    
+    }
+
+    function _calcTokentoMint(uint256 prevAmount, uint256 myAmount) interanl returns(uint256){
+        return FullMath.mulDiv(myAmount, this.totalSupply(), prevAmount);
+    }
+
+    function updatePosition() internal {
+        if(position.liquidity > 0){
+            pool.burn(_position.tickLower, _position.tickUpper, 0);
+        }
     }
     
-    ///@notice update position fee using IUniswapV3Pool.burn with zero liquidity
-    function updatePosition() internal {
-        require(position.liquidity > 0, "not enough liquidity to update");
-        pool.burn(position.tickLower, position.tickUpper, 0);
-    }
-
-    ///@notice collect fee from current position
-    ///@dev after update position, collect fee and calculate protocolfee
-/**    function collectFee() private returns (uint128 collected0, uint128 collected1) {
-        //1.update fee
-        updatePosition();
-        //poisition liquidity > 0 인지 확인해보기
-
-        //2.collect
-        uint24 protocolFee = fee;
-
-        (uint128 amount0, uint128 amount1) = pool.collect(
-            address(this),
-            position.tickLower,
-            position.tickUpper,
-            type(uint128).max,
-            type(uint128).max
-        );
-        
-        uint128 protocolfee0 = amount0.mul(protocolFee).div(1e6);
-        uint128 protocolfee1 = amount1.mul(protocolFee).div(1e6);
-
-        collected0 = amount0.sub(protocolfee0);
-        collected1 = amount1.sub(protocolfee1);
-    }
-*/
     function uniswapV3MintCallback(
         uint256 amount0,
         uint256 amount1,
