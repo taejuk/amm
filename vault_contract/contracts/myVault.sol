@@ -103,6 +103,11 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 
         position.unlocked = true;
     }
+
+    function test() public view returns (string memory) {
+        return "vault";
+    }
+    
     /** 
     * @notice user가 vault에 예치할때 amount 비율 계산해서 토큰 받고 자체 발행 토큰 주고(mint) vault에 토큰 저장
     * @dev payable????????????

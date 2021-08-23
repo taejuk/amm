@@ -19,7 +19,7 @@ contract vaultFactory {
         _;
     }
     
-    mapping(address => address) getVaults;
+    mapping(address => address) public getVaults;
     
     constructor(address _owner) public {
         owner = _owner;
@@ -28,7 +28,7 @@ contract vaultFactory {
     function createVault(
         address _pool,
         uint24 fee
-    ) external onlyOwner payable returns (address vault){
+    ) external onlyOwner returns (address vault){
         //중복 방 지
         require(getVaults[_pool] == address(0));
         vault = address(new myVault(address(this), _pool, fee));
@@ -38,5 +38,9 @@ contract vaultFactory {
     
     function setOwner(address _owner) external onlyOwner {
         owner = _owner;
+    }
+
+    function greet() public view returns (string memory) {
+        return "Hello, world!";
     }
 }
