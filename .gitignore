@@ -7,3 +7,6 @@ backtest/node_modules/
 node_modules
 dist/*
 *.log
+
+vault_contract/artifacts/
+vault_contract/cache/
