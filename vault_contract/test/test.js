@@ -69,11 +69,10 @@ describe("VaultFactory", function () {
 
     const rebalancetx = await vault.rebalance(rebalanceParam);
     await rebalancetx.wait();
+    console.log("address : ", await owner.getAddress());
 
-    const minttx = await vault.deposit(await owner.getAddress(),0,0,0,0)
+    const minttx = await vault.deposit(await owner.getAddress(),500,20);
     await minttx.wait();
-
-    console.log(await vault.getPosition());
 
     expect(await vault.test()).to.equal("vault");
   });

@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 pragma abicoder v2;
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/ERC20.sol";
-//import "../libraries/IERC20.sol";
+import "../libraries/IERC20.sol";
+import "../libraries/SafeERC20.sol";
 import "../libraries/SafeCast.sol";
 // import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol';
 // import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
@@ -19,14 +20,15 @@ import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback.so
 import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol";
 import "@uniswap/v3-periphery/contracts/libraries/PositionKey.sol";
 import "@uniswap/v3-periphery/contracts/libraries/LiquidityAmounts.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "hardhat/console.sol";
 
 
-contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
+contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 {
     //using SafeMath for uint128;
     using SafeMath for uint256;
     using SafeCast for uint256;
+    using SafeERC20 for IERC20;
     
     //tokensssss
     //uint8 public constant decimals = 18;
@@ -44,10 +46,14 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 
     //update when call rebalance
     
-    address public immutable token0;
-    address public immutable token1;
+    IERC20 public immutable token0;
+    IERC20 public immutable token1;
 
     uint private previousTime;
+
+    event Deposit(address recipient, uint256 tokenAmount, uint256 amount0, uint256 amount1);
+    event Withdraw(address recipient, uint256 amount0, uint256 amount1);
+    event Rebalance(int24 tickLower, int24 tickUpper);
 
     struct SqrtRatios{
         uint160 sqrtPriceX96;
@@ -85,9 +91,9 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     /**
      * @dev Set contract deployer as owner
      */
-    constructor(address _factory, address _pool, uint24 _fee, address _rebalancer) mERC20 ("CWC", "CWC") {
-        token0 = IUniswapV3Pool(_pool).token0();
-        token1 = IUniswapV3Pool(_pool).token1();
+    constructor(address _factory, address _pool, uint24 _fee, address _rebalancer) ERC20 ("CWC", "CWC") {
+        token0 = IERC20(IUniswapV3Pool(_pool).token0());
+        token1 = IERC20(IUniswapV3Pool(_pool).token1());
 
         factory = _factory;
         pool = IUniswapV3Pool(_pool);
@@ -116,9 +122,7 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     function deposit(
         address recipient,
         uint256 amount0Desired,
-        uint256 amount1Desired,
-        uint256 amount0min,
-        uint256 amount1min
+        uint256 amount1Desired
     ) external lock returns (uint256 tokenAmount, uint256 amount0, uint256 amount1){
         PositionInfo memory _position = position;
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
@@ -130,11 +134,12 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
             updatePosition(_position);
         }
         tokenAmount = AmountToMint(ratios, _position, amount0Desired, amount1Desired);
+        console.log("tokenAmount : ", tokenAmount);
         _mint(recipient, tokenAmount);
 
         (amount0, amount1) = addLiquidity(_position, ratios, amount0Desired, amount1Desired, recipient);
 
-        require(amount0 > amount0min && amount1 > amount1min, "deposit slippage");
+        emit Deposit(recipient, tokenAmount, amount0, amount1);
     }
 
     function withdraw(
@@ -219,8 +224,8 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
                 _swap(param);
             }
 
-            amount0 = IERC20(token0).balanceOf(address(this)) - protocolFee0;
-            amount1 = IERC20(token1).balanceOf(address(this)) - protocolFee1;
+            amount0 = token0.balanceOf(address(this)) - protocolFee0;
+            amount1 = token1.balanceOf(address(this)) - protocolFee1;
 
             _position.tickLower = param.tickLower;
             _position.tickUpper = param.tickUpper;
@@ -287,8 +292,8 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 
         (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
 
-        pureInterest0 = uint256(tokenOwed0) - (collectAmount0);
-        pureInterest1 = uint256(tokenOwed1) - (collectAmount1);
+        pureInterest0 = uint256(tokenOwed0) - collectAmount0 - protocolFee0;
+        pureInterest1 = uint256(tokenOwed1) - collectAmount1 - protocolFee1;
     }
 
     function _swap(RebalanceParams memory param) internal {
@@ -346,7 +351,7 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 
         
         (uint256 interest0, uint256 interest1) =
-            _fee > 0 ? (FullMath.mulDiv(uint256(tokenOwed0), _fee, 1e6), FullMath.mulDiv(uint256(tokenOwed1), _fee, 1e6)) :
+            _fee > 0 ? (FullMath.mulDiv(uint256(tokenOwed0) - protocolFee0, _fee, 1e6), FullMath.mulDiv(uint256(tokenOwed1) - protocolFee1, _fee, 1e6)) :
             (0, 0);
         
         (uint256 amount0, uint256 amount1) = LiquidityAmounts.getAmountsForLiquidity(
@@ -387,11 +392,11 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         require(msg.sender == address(pool));
 
         if(payer == address(this)){
-            if(amount0 > 0) TransferHelper.safeTransfer(token0, msg.sender, amount0);
-            if(amount1 > 0) TransferHelper.safeTransfer(token1, msg.sender, amount1);
+            if(amount0 > 0) token0.safeTransfer(msg.sender, amount0);
+            if(amount1 > 0) token1.safeTransfer(msg.sender, amount1);
         } else{
-            if(amount0 > 0) TransferHelper.safeTransferFrom(token0, payer, msg.sender, amount0);
-            if(amount1 > 0) TransferHelper.safeTransferFrom(token1, payer, msg.sender, amount1);
+            if(amount0 > 0) token0.safeTransferFrom(payer, msg.sender, amount0);
+            if(amount1 > 0) token1.safeTransferFrom(payer, msg.sender, amount1);
         }
     }
     
@@ -406,9 +411,9 @@ contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         (bool tokenToPay, uint256 amountToPay) = amount0Delta > 0 ? (true, uint256(amount0Delta)) : (false, uint256(amount1Delta));
         
         if(tokenToPay){
-            TransferHelper.safeTransfer(token0, msg.sender, amountToPay);
+            token0.safeTransfer(msg.sender, amountToPay);
         } else{
-            TransferHelper.safeTransfer(token1, msg.sender, amountToPay);
+            token1.safeTransfer(msg.sender, amountToPay);
         }
         
     }
