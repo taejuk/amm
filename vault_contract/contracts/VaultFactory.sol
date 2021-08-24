@@ -3,7 +3,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "./myVault.sol";
-
 /**
  * @title Storage
  * @dev Store & retrieve value in a variable
@@ -21,17 +20,18 @@ contract vaultFactory {
     
     mapping(address => address) public getVaults;
     
-    constructor(address _owner) public {
+    constructor(address _owner) {
         owner = _owner;
     }
     
     function createVault(
         address _pool,
-        uint24 fee
+        uint24 fee,
+        address _rebalancer
     ) external onlyOwner returns (address vault){
         //중복 방 지
         require(getVaults[_pool] == address(0));
-        vault = address(new myVault(address(this), _pool, fee));
+        vault = address(new myVault(address(this), _pool, fee, _rebalancer));
         getVaults[_pool] = vault;
         emit vaultCreate(vault, fee);
     }
@@ -40,7 +40,7 @@ contract vaultFactory {
         owner = _owner;
     }
 
-    function greet() public view returns (string memory) {
+    function greet() public pure returns (string memory) {
         return "Hello, world!";
     }
 }

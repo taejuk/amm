@@ -1,42 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0
-
-
-/**
-~ TODO ~
-
-burn 은 포지션에서 빼서 tokenowed로 옮긴다...
-
-tx.gasprice 비교해서 미뤄도 될듯?
-
- */
-
-
-
-
 pragma solidity >=0.7.0 <0.9.0;
 pragma abicoder v2;
 
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol';
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol';
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolActions.sol';
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolOwnerActions.sol';
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolEvents.sol';
+import "../libraries/SafeMath.sol";
+import "../libraries/ERC20.sol";
+//import "../libraries/IERC20.sol";
+import "../libraries/SafeCast.sol";
+// import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol';
+// import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
+// import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol';
+// import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolActions.sol';
+// import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolOwnerActions.sol';
+// import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolEvents.sol';
 import "@uniswap/v3-core/contracts/libraries/TickMath.sol";
 import "@uniswap/v3-core/contracts/libraries/FullMath.sol";
 import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback.sol";
 import "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol";
 import "@uniswap/v3-periphery/contracts/libraries/PositionKey.sol";
 import "@uniswap/v3-periphery/contracts/libraries/LiquidityAmounts.sol";
-import "../libraries/SafeMath.sol";
-import "../libraries/ERC20.sol";
-import "../libraries/IERC20.sol";
-import "../libraries/SafeCast.sol";
+import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 
 
-
-contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
+contract myVault is mERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 {
     //using SafeMath for uint128;
     using SafeMath for uint256;
@@ -49,16 +35,17 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     //uint256 public totalSupply;
 
     address public factory;
+    address public Rebalancer;
     IUniswapV3Pool public pool;
     uint24 public fee;
 
-    uint256 private cumulatedFee0;
-    uint256 private cumulatedFee1;
+    uint256 private protocolFee0;
+    uint256 private protocolFee1;
 
     //update when call rebalance
     
-    IERC20 public immutable token0;
-    IERC20 public immutable token1;
+    address public immutable token0;
+    address public immutable token1;
 
     uint private previousTime;
 
@@ -89,23 +76,34 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         _;
         position.unlocked = true;
     }
+
+    modifier onlyRebalancer(){
+        require(msg.sender == Rebalancer, "not rebalancer");
+        _;
+    }
     
     /**
      * @dev Set contract deployer as owner
      */
-    constructor(address _factory, address _pool, uint24 _fee) ERC20 ("CWC", "CWC") {
-        token0 = IERC20(IUniswapV3Pool(_pool).token0());
-        token1 = IERC20(IUniswapV3Pool(_pool).token1());
+    constructor(address _factory, address _pool, uint24 _fee, address _rebalancer) mERC20 ("CWC", "CWC") {
+        token0 = IUniswapV3Pool(_pool).token0();
+        token1 = IUniswapV3Pool(_pool).token1();
 
         factory = _factory;
         pool = IUniswapV3Pool(_pool);
         fee = _fee;
+        Rebalancer = _rebalancer;
 
         position.unlocked = true;
+        position.initialized = false;
     }
 
-    function test() public view returns (string memory) {
+    function test() public pure returns (string memory) {
         return "vault";
+    }
+
+    function getPosition() public view returns(PositionInfo memory){
+        return position;
     }
     
     /** 
@@ -124,56 +122,21 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     ) external lock returns (uint256 tokenAmount, uint256 amount0, uint256 amount1){
         PositionInfo memory _position = position;
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
-        require(_position.initialized, "uninitialized position");
+        //require(_position.initialized, "uninitialized position");
 
-        SqrtRatios memory ratios = getRatios(_position);
+        SqrtRatios memory ratios = getRatios(_position.tickLower, _position.tickUpper);
 
-        updatePosition(_position);
-
-
+        if(_position.initialized){
+            updatePosition(_position);
+        }
         tokenAmount = AmountToMint(ratios, _position, amount0Desired, amount1Desired);
         _mint(recipient, tokenAmount);
 
         (amount0, amount1) = addLiquidity(_position, ratios, amount0Desired, amount1Desired, recipient);
 
-
         require(amount0 > amount0min && amount1 > amount1min, "deposit slippage");
     }
 
-    
-    function _burnAstoken(PositionInfo memory _position, uint256 tokenAmount) internal returns (uint256 amount0, uint256 amount1) {
-        (uint128 liquidity,,,,) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
-        uint256 liquidityDelta = mulTokenRate(uint256(liquidity), tokenAmount);
-
-        (amount0, amount1) = pool.burn(_position.tickLower, _position.tickUpper, SafeCast.toUint128(liquidityDelta));
-    }
-
-    function _collectAstoken(
-        PositionInfo memory _position,
-        uint256 tokenAmount,
-        uint256 burnedamount0,
-        uint256 burnedamount1
-        ) internal returns(uint128 amount0, uint128 amount1) {
-            (,,,uint128 tokenOwed0 ,uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
-            uint256 amountFee0 = mulTokenRate(tokenOwed0 - burnedamount0, tokenAmount);
-            uint256 amountFee1 = mulTokenRate(tokenOwed1 - burnedamount1, tokenAmount);
-
-            uint128 amountToCollect0 = SafeCast.toUint128(burnedamount0 + amountFee0);
-            uint128 amountToCollect1 = SafeCast.toUint128(burnedamount1 + amountFee1);
-
-            (amount0, amount1) = pool.collect(
-                address(this),
-                _position.tickLower,
-                _position.tickUpper,
-                amountToCollect0,
-                amountToCollect1
-            );
-    }
-
-    /**
-    * @notice user가 예치해 둔 토큰 태우고 유저에게 해당 토큰만큼 비율에 맞게 예치토큰 준다. vault에 임시로 예치된 liquidity로
-    * 해결되면 그걸로 지급. 부족하면 position에서 decreaseliquidity후 지급 fee 계산은 어떻게 하지?????????
-    */
     function withdraw(
         address recipient,
         uint256 _token,
@@ -191,16 +154,125 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
 
         // burn liquidity from position
-        (uint256 burnedAmount0, uint256 burnedAmount1) = _burnAstoken(_position, token);
+        (uint256 Amount0toCollect, uint256 Amount1toCollect) = _burnAstoken(_position, token);
         // collect burned liquidity and earned fee
-        (amount0, amount1) = _collectAstoken(_position, token, burnedAmount0, burnedAmount1);
+        pool.collect(
+            address(this),
+            _position.tickLower,
+            _position.tickUpper,
+            SafeCast.toUint128(Amount0toCollect),
+            SafeCast.toUint128(Amount1toCollect)
+        );
         //r : rate, To : tokenowed after burn liquiditydelta, L : liquidity
         //(To - L(1-r))r
         _burn(recipient, _token);
 
         require(amount0 >= amount0min && amount1 >= amount1min, "withdraw slippage");
-        //add event
     }
+    struct RebalanceParams{
+        int24 tickLower;
+        int24 tickUpper;
+        int256 swapAmount;
+        bool zeroforOne;
+        uint160 sqrtPriceLimitX96;
+    }
+
+    function rebalance(
+        RebalanceParams memory param
+    ) external lock onlyRebalancer returns (uint256 amount0, uint256 amount1){
+        require(param.tickLower < param.tickUpper, "range invalid");
+        require(block.timestamp - previousTime > 10000 || previousTime == 0, "rebalance perioud error");
+
+        previousTime = block.timestamp;
+        
+        PositionInfo memory _position = position;
+        SqrtRatios memory ratios = getRatios(param.tickLower, param.tickUpper);
+        //require(zeroforOne ? 
+        //swapAmount < LiquidityAmounts.getAmount0ForLiquidity(ratios.sqrtRatioAX96, ratios.sqrtRatioBX96, _position.liquidity) : 
+        //swapAmount < LiquidityAmounts.getAmount1ForLiquidity(ratios.sqrtRatioAX96, ratios.sqrtRatioBX96, _position.liquidity));
+
+        if(_position.initialized){
+            updatePosition(_position);
+            (uint128 liquidity,,,,) =
+             pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+             
+            (uint256 pureInterest0, uint256 pureInterest1,,) = _calcPureInterest(_position, liquidity);
+            //pureinterest = tokenowed(fee + burned liquidty) - collectAmount
+
+            (uint256 protocolfee0, uint256 protocolfee1) = (FullMath.mulDiv(pureInterest0, fee, 1e6), FullMath.mulDiv(pureInterest1, fee, 1e6));
+
+            protocolFee0 += protocolfee0;
+            protocolFee1 += protocolfee1;
+
+            pool.collect(
+                address(this),
+                _position.tickLower,
+                _position.tickUpper,
+                type(uint128).max,
+                type(uint128).max
+            );
+
+            position.initialized = false;
+
+            //safe convert
+            if(param.swapAmount > 0){
+                _swap(param);
+            }
+
+            amount0 = IERC20(token0).balanceOf(address(this)) - protocolFee0;
+            amount1 = IERC20(token1).balanceOf(address(this)) - protocolFee1;
+
+            _position.tickLower = param.tickLower;
+            _position.tickUpper = param.tickUpper;
+            (amount0, amount1) = addLiquidity(_position, ratios, amount0, amount1, address(this));
+            position.initialized = true;
+            position.positionKey = PositionKey.compute(address(this), param.tickLower, param.tickUpper);
+        }
+        // else {
+        //     _position.tickLower = param.tickLower;
+        //     _position.tickUpper = param.tickUpper;
+        //     //addLiquidity(_position, ratios, 0, 0, address(this));
+        // }
+        
+        {
+            position.tickLower = param.tickLower;
+            position.tickUpper = param.tickUpper;
+            //position.initialized = true;
+            //position.positionKey = PositionKey.compute(address(this), param.tickLower, param.tickUpper);
+        }
+    }
+
+    
+    function _burnAstoken(PositionInfo memory _position, uint256 tokenAmount) internal returns (uint256 amount0, uint256 amount1) {
+        updatePosition(_position);
+        (uint128 liquidity,,,,) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        uint256 liquidityDelta = FullMath.mulDiv(uint256(liquidity), tokenAmount, this.totalSupply());
+
+        (uint256 pureInterest0, uint256 pureInterest1, uint256 burnedamount0 , uint256 burnedamount1) = _calcPureInterest(_position, SafeCast.toUint128(liquidityDelta));
+
+        (uint256 fee0, uint256 fee1) = _calcProtocolFee(pureInterest0, pureInterest1);
+        amount0 = fee0 + burnedamount0;
+        amount1 = fee1 + burnedamount1;
+    }
+
+    function _calcProtocolFee(
+        uint256 pureInterest0,
+        uint256 pureInterest1
+    ) internal returns(uint256 amountfeeCollect0, uint256 amountfeeCollect1) {
+        uint256 protocolfee0 = FullMath.mulDiv(pureInterest0, fee, 1e6);
+        uint256 protocolfee1 = FullMath.mulDiv(pureInterest1, fee, 1e6);
+
+        protocolFee0 += protocolfee0;
+        protocolFee1 += protocolfee1;
+
+        amountfeeCollect0 = pureInterest0 - protocolfee0;
+        amountfeeCollect1 = pureInterest1 - protocolfee1;
+    }
+
+    /**
+    * @notice user가 예치해 둔 토큰 태우고 유저에게 해당 토큰만큼 비율에 맞게 예치토큰 준다. vault에 임시로 예치된 liquidity로
+    * 해결되면 그걸로 지급. 부족하면 position에서 decreaseliquidity후 지급 fee 계산은 어떻게 하지?????????
+    */
     
     function _calcPureInterest(
         PositionInfo memory _position,
@@ -219,83 +291,6 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         pureInterest1 = uint256(tokenOwed1) - (collectAmount1);
     }
 
-    
-    function mulTokenRate(uint256 value, uint256 token) internal view
-    returns (uint256) {
-        return value.mul(token).div(this.totalSupply());
-    }
-    
-    struct RebalanceParams{
-        int24 tickLower;
-        int24 tickUpper;
-        int256 swapAmount;
-        bool zeroforOne;
-        uint160 sqrtPriceLimitX96;
-    }
-    
-
-    /**
-    * @notice stragy 컨트랙트에서 볼트 리벨런싱 호출하면 인자로 버뮈 받아서 이자랑 볼트에 있던 돈 빼서 새로운 포지션 생성. 필요한 양만큼 스왑
-    */
-    function rebalance(
-        RebalanceParams memory param
-    ) external lock returns (uint256 amount0, uint256 amount1){
-        require(param.tickLower < param.tickUpper, "range invalid");
-        require(block.timestamp - previousTime > 10000, "rebalance perioud error");
-
-
-        previousTime = block.timestamp;
-        
-        PositionInfo memory _position = position;
-        SqrtRatios memory ratios = getRatios(_position);
-        //require(zeroforOne ? 
-        //swapAmount < LiquidityAmounts.getAmount0ForLiquidity(ratios.sqrtRatioAX96, ratios.sqrtRatioBX96, _position.liquidity) : 
-        //swapAmount < LiquidityAmounts.getAmount1ForLiquidity(ratios.sqrtRatioAX96, ratios.sqrtRatioBX96, _position.liquidity));
-
-        /// @dev burn and collect
-        //calculate amount from liquidity in position
-        if(_position.initialized){
-             (uint128 liquidity,,,,) =
-             pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
-             
-            (uint256 pureInterest0, uint256 pureInterest1,,) = _calcPureInterest(_position, liquidity);
-            //pureinterest = tokenowed(fee + burned liquidty) - collectAmount
-
-            (uint256 protocolFee0, uint256 protocolFee1) = (FullMath.mulDiv(pureInterest0, fee, 1e6), FullMath.mulDiv(pureInterest1, fee, 1e6));
-
-            pool.collect(
-                address(this),
-                _position.tickLower,
-                _position.tickUpper,
-                type(uint128).max,
-                type(uint128).max
-            );
-
-            position.initialized = false;
-
-            //safe convert
-            if(param.swapAmount > 0){
-                _swap(param);
-            }
-
-            amount0 = token0.balanceOf(address(this)) - protocolFee0;
-            amount1 = token1.balanceOf(address(this)) - protocolFee1;
-
-            _position.tickLower = param.tickLower;
-            _position.tickUpper = param.tickUpper;
-            (amount0, amount1) = addLiquidity(_position, ratios, amount0, amount1, address(this));
-        }
-        else{
-            addLiquidity(_position, ratios, 0, 0, address(this));
-        }
-        {
-            position.tickLower = param.tickLower;
-            position.tickUpper = param.tickUpper;
-            position.initialized = true;
-            position.positionKey = PositionKey.compute(address(this), param.tickLower, param.tickUpper);
-        }
-    }
-
     function _swap(RebalanceParams memory param) internal {
         pool.swap(
             address(this),
@@ -307,13 +302,13 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     }
 
     function getRatios(
-        PositionInfo memory _position
+        int24 tickLower,
+        int24 tickUpper
     ) internal view returns (SqrtRatios memory ratios){
         (ratios.sqrtPriceX96, , , , , , ) = pool.slot0();
-        ratios.sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(_position.tickLower);
-        ratios.sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(_position.tickUpper);
+        ratios.sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(tickLower);
+        ratios.sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(tickUpper);
     }
-
 
     function addLiquidity(
         PositionInfo memory _position,
@@ -345,7 +340,7 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         uint256 addAmount0,
         uint256 addAmount1
     ) internal view returns (uint256 tokenAmount){
-        //todo : change tokenowed to pureTokenOwed
+
         uint256 _fee = fee;
         (uint128 liquidity,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
 
@@ -392,11 +387,11 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         require(msg.sender == address(pool));
 
         if(payer == address(this)){
-            token0.transfer(msg.sender, amount0);
-            token1.transfer(msg.sender, amount1);
+            if(amount0 > 0) TransferHelper.safeTransfer(token0, msg.sender, amount0);
+            if(amount1 > 0) TransferHelper.safeTransfer(token1, msg.sender, amount1);
         } else{
-            token0.transferFrom(payer, msg.sender, amount0);
-            token1.transferFrom(payer, msg.sender, amount1);
+            if(amount0 > 0) TransferHelper.safeTransferFrom(token0, payer, msg.sender, amount0);
+            if(amount1 > 0) TransferHelper.safeTransferFrom(token1, payer, msg.sender, amount1);
         }
     }
     
@@ -411,22 +406,25 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         (bool tokenToPay, uint256 amountToPay) = amount0Delta > 0 ? (true, uint256(amount0Delta)) : (false, uint256(amount1Delta));
         
         if(tokenToPay){
-            token0.transfer(msg.sender, amountToPay);
+            TransferHelper.safeTransfer(token0, msg.sender, amountToPay);
         } else{
-            token1.transfer(msg.sender, amountToPay);
+            TransferHelper.safeTransfer(token1, msg.sender, amountToPay);
         }
         
     }
 
     //function collectProtocol() external onlyFactory {}
     
-    function getBalance0() external view returns (uint256 balance){
-        balance = token0.balanceOf(address(this));
-    }
-    function getBalance1() external view returns (uint256 balance){
-        balance = token1.balanceOf(address(this));
-    } 
     function setFactory(address _factory) external onlyFactory{
         factory = _factory;
+    }
+    function getProtocolFees() external view returns (uint256, uint256){
+        return (protocolFee0, protocolFee1);
+    }
+    function setRebalancer(address _rebalancer) external onlyRebalancer{
+        Rebalancer = _rebalancer;
+    }
+    function getRebalancer() external view returns(address){
+        return Rebalancer;
     }
 }
