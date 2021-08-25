@@ -1,0 +1,24 @@
+{
+  "name": "simulator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ts-node": "^10.2.1",
+    "typescript": "^4.3.5"
+  },
+  "devDependencies": {
+    "@uniswap/sdk-core": "^3.0.1",
+    "@uniswap/v3-sdk": "^3.3.2",
+    "axios": "^0.21.1",
+    "dotenv": "^10.0.0",
+    "jsbi": "^3.2.1",
+    "mongoose": "^6.0.0",
+    "web3": "^1.5.2"
+  }
+}
