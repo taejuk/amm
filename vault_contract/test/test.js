@@ -6,8 +6,9 @@ const { abi : IUniswapV3PoolABI } = require("@uniswap/v3-core/artifacts/contract
 const { abi : UniPeriABI } = require('@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json');
 const {abi: usdcABI} = require("./usdcabi.json");
 const {abi: wethABI} = require("./wethabi.json");
-const { BigintIsh, Price, Token, CurrencyAmount, WETH9 } = require('@uniswap/sdk-core');
+const { Token, WETH9 } = require('@uniswap/sdk-core');
 const { nearestUsableTick } = require("@uniswap/v3-sdk");
+const { swapdata } = require("./swaps.json");
 
 const provider  = new ethers.providers.getDefaultProvider("homestead", {alchemy: "https://eth-mainnet.alchemyapi.io/v2/D73_ryQg6AXEruir7eSrcgqw0AgpArxc"});
 
@@ -36,7 +37,6 @@ const weth = new ethers.Contract(
   provider
 );
 
-
 describe("VaultFactory", function () {
 
   var vault;
@@ -47,7 +47,7 @@ describe("VaultFactory", function () {
   var addr3;
 
 
-  before("swap", async function(){
+  before("get usdc", async function(){
     var slot0 = await poolContract.slot0();
     console.log("before swap tick : ", slot0.tick);
     [owner, addr1, addr2, addr3] = await ethers.getSigners();
@@ -62,6 +62,8 @@ describe("VaultFactory", function () {
     let override = {
       value: ethers.utils.parseEther("200")
     }
+
+    //console.log("override data : ", ethers.utils.parseEther("200"));
 
     for(var account of accounts){
       await weth.connect(account).deposit(override);
@@ -124,10 +126,6 @@ describe("VaultFactory", function () {
         zeroforOne : true,
         sqrtPriceLimitX96: slot0.sqrtPriceX96,
       }
-      console.log("cur tick : ", slot0.tick);
-      console.log("cur tick sqrtprice : ", slot0.sqrtPriceX96.toString());
-      console.log("usable tick : ", nearestUsableTick(slot0.tick, tickspacing) - tickspacing * 2);
-      console.log("usable tick : ", nearestUsableTick(slot0.tick, tickspacing) + tickspacing * 2);
 
       const rebalancetx = await vault.rebalance(rebalanceParam);
       await rebalancetx.wait();
@@ -143,14 +141,6 @@ describe("VaultFactory", function () {
       await weth.connect(addr1).approve(vaultaddres, ethers.utils.parseEther("100"));
       await usdc.connect(addr1).approve(vaultaddres, 100000000000);
 
-      const slot0 = await poolContract.connect(owner).slot0();
-      const tickspacing = await poolContract.tickSpacing();
-
-      console.log("cur tick : ", slot0.tick);
-      console.log("cur tick sqrtprice : ", slot0.sqrtPriceX96.toString());
-      console.log("usable tick : ", nearestUsableTick(slot0.tick, tickspacing) - tickspacing * 2);
-      console.log("usable tick : ", nearestUsableTick(slot0.tick, tickspacing) + tickspacing * 2);
-
       const minttx = await vault.connect(addr1).deposit(addr1.address, 100000000000, ethers.utils.parseEther("100"));
       await minttx.wait();
 
@@ -162,14 +152,6 @@ describe("VaultFactory", function () {
       await weth.connect(addr2).approve(vaultaddres, ethers.utils.parseEther("100"));
       await usdc.connect(addr2).approve(vaultaddres, 100000000000);
 
-      const slot0 = await poolContract.connect(owner).slot0();
-      const tickspacing = await poolContract.tickSpacing();
-
-      console.log("cur tick : ", slot0.tick);
-      console.log("cur tick sqrtprice : ", slot0.sqrtPriceX96.toString());
-      console.log("usable tick : ", nearestUsableTick(slot0.tick, tickspacing) - tickspacing * 2);
-      console.log("usable tick : ", nearestUsableTick(slot0.tick, tickspacing) + tickspacing * 2);
-
       const minttx = await vault.connect(addr2).deposit(addr2.address, 50000000000, ethers.utils.parseEther("50"));
       await minttx.wait();
 
@@ -178,4 +160,93 @@ describe("VaultFactory", function () {
     });
 
   });
+
+  describe("swap", function(){
+
+    it("swap 10 times", async function(){
+      var addr4 = (await ethers.getSigners())[5];
+      const routerContract = new ethers.Contract(
+        routerAddress,
+        UniPeriABI,
+        addr4
+      );
+
+      const time = await provider.getBlock(13093580);
+
+      for(var i = 0; i < 50; i++){
+        const data = swapdata[i];
+        //console.log(ethers.BigNumber.from(data.amount1).toString());
+    
+        
+        let override = data.amount1 > 0 ? { value: ethers.BigNumber.from(data.amount1) }: null
+        if(override){
+          await weth.connect(addr4).deposit(override);
+          await weth.connect(addr4).approve(routerAddress, ethers.BigNumber.from(data.amount1));
+          //console.log("approve");
+          let param = {
+            tokenIn : token1.address,
+            tokenOut : token0.address,
+            fee : 3000,
+            recipient : addr4.address,
+            deadline : time.timestamp + 1000,
+            amountIn : ethers.BigNumber.from(data.amount1),
+            amountOutMinimum : ethers.BigNumber.from("10000000"),
+            sqrtPriceLimitX96 : 0,
+          }
+
+          let tx = await routerContract.connect(addr4).exactInputSingle(param);
+          await tx.wait();
+        }
+        else{
+          await usdc.connect(addr4).approve(routerAddress, ethers.BigNumber.from(data.amount0));
+
+          let param = {
+            tokenIn : token0.address,
+            tokenOut : token1.address,
+            fee : 3000,
+            recipient : addr4.address,
+            deadline : time.timestamp + 1000,
+            amountIn : ethers.BigNumber.from(data.amount0),
+            amountOutMinimum : ethers.BigNumber.from("10000000"),
+            sqrtPriceLimitX96 : 0,
+          }
+
+          let tx = await routerContract.connect(addr4).exactInputSingle(param);
+          await tx.wait();
+        }
+        
+        //console.log("weth balance : ", (await weth.connect(account).balanceOf(account.address)).toString());
+        //console.log("usdc balance : ", (await usdc.connect(account).balanceOf(account.address)).toString());
+      }
+    });
+
+    it("check protocolFee",async function(){
+      const tx = await vault.connect(owner).updatePosition();
+      await tx.wait();
+      const data = await vault.connect(owner).getTokenOweds();
+
+      console.log("tokenOwed fee", data[0].toString(), data[1].toString());
+    });
+
+  });
+
+  describe("withdraw", function(){
+    it("withdraw liquidity", async function(){
+      const weth_before = await weth.connect(addr2).balanceOf(addr2.address);
+      const usdc_before = await usdc.connect(addr2).balanceOf(addr2.address);
+
+      const tokenAmount = await vault.connect(addr2).balanceOf(addr2.address);
+      //console.log("token amount : ", tokenAmount.toString());
+
+      const tx = await vault.connect(addr2).withdraw(addr2.address, tokenAmount, 1000000, 100000);
+      await tx.wait();
+
+      const weth_after = await weth.connect(addr2).balanceOf(addr2.address);
+      const usdc_after = await usdc.connect(addr2).balanceOf(addr2.address);
+
+      console.log("earn weth :", weth_after.sub(weth_before).toString());
+      console.log("earn usdc :", usdc_after.sub(usdc_before).toString());
+    });
+  });
+
 });

@@ -160,11 +160,9 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         uint256 amount1min
     )external lock returns (uint128 amount0, uint128 amount1){
         require(balanceOf(recipient) >= _token, "not enough token");
-        uint256 totalSupply = this.totalSupply();
-        require(_token < totalSupply, "token value error");
+        require(_token < this.totalSupply(), "token value error");
 
         uint256 token = _token;
-        //updatePosition();
 
         PositionInfo memory _position = position;
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
@@ -172,8 +170,8 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         // burn liquidity from position
         (uint256 Amount0toCollect, uint256 Amount1toCollect) = _burnAstoken(_position, token);
         // collect burned liquidity and earned fee
-        pool.collect(
-            address(this),
+        (amount0, amount1) = pool.collect(
+            recipient,
             _position.tickLower,
             _position.tickUpper,
             SafeCast.toUint128(Amount0toCollect),
@@ -267,14 +265,19 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     
     function _burnAstoken(PositionInfo memory _position, uint256 tokenAmount) internal returns (uint256 amount0, uint256 amount1) {
         updatePosition(_position);
-        (uint128 liquidity,,,,) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        (uint128 liquidity,,,uint128 pretokenOwed0, uint128 pretokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
         uint256 liquidityDelta = FullMath.mulDiv(uint256(liquidity), tokenAmount, this.totalSupply());
+        console.log("in contract liquidity", liquidity);
+        console.log("in contract liquidityDelta", liquidityDelta);
 
-        (uint256 pureInterest0, uint256 pureInterest1, uint256 burnedamount0 , uint256 burnedamount1) = _calcPureInterest(_position, SafeCast.toUint128(liquidityDelta));
+        (amount0, amount1) = pool.burn(_position.tickLower, _position.tickUpper, SafeCast.toUint128(liquidityDelta));
+        (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        uint256 pureInterest0 = uint256(tokenOwed0) - uint256(pretokenOwed0) - protocolFee0;
+        uint256 pureInterest1 = uint256(tokenOwed1) - uint256(pretokenOwed1) - protocolFee1;
 
         (uint256 fee0, uint256 fee1) = _calcProtocolFee(pureInterest0, pureInterest1);
-        amount0 = fee0 + burnedamount0;
-        amount1 = fee1 + burnedamount1;
+        amount0 += fee0;
+        amount1 += fee1;
     }
 
     function _calcProtocolFee(
@@ -305,12 +308,20 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         uint256 collectAmount0,
         uint256 collectAmount1
     ){
+        (,,,uint128 pretokenOwed0, uint128 pretokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+
         (collectAmount0, collectAmount1) = pool.burn(_position.tickLower, _position.tickUpper, liquidityDelta);
+        console.log("in contract burned amount0", collectAmount0);
+        console.log("in contract burned amount1", collectAmount1);
 
         (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        console.log("in contract tokenOwed0", tokenOwed0);
+        console.log("in contract tokenOwed1", tokenOwed1);
 
         pureInterest0 = uint256(tokenOwed0) - collectAmount0 - protocolFee0;
         pureInterest1 = uint256(tokenOwed1) - collectAmount1 - protocolFee1;
+        console.log("in contract pureInterest0", pureInterest0);
+        console.log("in contract pureInterest1", pureInterest1);
     }
 
     function _swap(RebalanceParams memory param) internal {
@@ -404,6 +415,10 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     function updatePosition(PositionInfo memory _position) internal {
         pool.burn(_position.tickLower, _position.tickUpper, 0);
     }
+
+    function updatePosition() external {
+        pool.burn(position.tickLower, position.tickUpper, 0);
+    }
     
     function uniswapV3MintCallback(
         uint256 amount0,
@@ -450,6 +465,9 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     }
     function getProtocolFees() external view returns (uint256, uint256){
         return (protocolFee0, protocolFee1);
+    }
+    function getTokenOweds() external view returns(uint128 tokenOwed0, uint128 tokenOwed1){
+        (,,,tokenOwed0, tokenOwed1) = pool.positions(PositionKey.compute(address(this), position.tickLower, position.tickUpper));
     }
     function setRebalancer(address _rebalancer) external onlyRebalancer{
         Rebalancer = _rebalancer;
