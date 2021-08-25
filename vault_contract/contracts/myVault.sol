@@ -56,6 +56,7 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     event Rebalance(int24 tickLower, int24 tickUpper);
 
     struct SqrtRatios{
+        int24 tick;
         uint160 sqrtPriceX96;
         uint160 sqrtRatioAX96;
         uint160 sqrtRatioBX96;
@@ -91,11 +92,11 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     /**
      * @dev Set contract deployer as owner
      */
-    constructor(address _factory, address _pool, uint24 _fee, address _rebalancer) ERC20 ("CWC", "CWC") {
+    constructor(address _pool, uint24 _fee, address _rebalancer) ERC20 ("CWC", "CWC") {
         token0 = IERC20(IUniswapV3Pool(_pool).token0());
         token1 = IERC20(IUniswapV3Pool(_pool).token1());
 
-        factory = _factory;
+        factory = msg.sender;
         pool = IUniswapV3Pool(_pool);
         fee = _fee;
         Rebalancer = _rebalancer;
@@ -104,8 +105,12 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         position.initialized = false;
     }
 
-    function test() public pure returns (string memory) {
-        return "vault";
+    function getToken0() public view returns (address) {
+        return address(token0);
+    }
+
+    function getToken1() public view returns (address) {
+        return address(token1);
     }
 
     function getPosition() public view returns(PositionInfo memory){
@@ -125,23 +130,26 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         uint256 amount1Desired
     ) external lock returns (uint256 tokenAmount, uint256 amount0, uint256 amount1){
         PositionInfo memory _position = position;
-        require(_position.tickUpper > _position.tickLower, "range unvailidate");
-        //require(_position.initialized, "uninitialized position");
 
-        SqrtRatios memory ratios = getRatios(_position.tickLower, _position.tickUpper);
+        require(_position.tickUpper > _position.tickLower, "range unvailidate");
 
         if(_position.initialized){
             updatePosition(_position);
         }
 
+        SqrtRatios memory ratios = getRatios(_position.tickLower, _position.tickUpper);
+
+        //console.log("sqrtprice0", ratios.sqrtPriceX96);
+        //console.log("sqrtprice1", ratios.sqrtRatioAX96);
+        //console.log("sqrtprice2", ratios.sqrtRatioBX96);
+
+        (uint128 liquidity,,,,) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+
         (amount0, amount1) = addLiquidity(_position, ratios, amount0Desired, amount1Desired, recipient);
 
-        tokenAmount = AmountToMint(ratios, _position, amount0, amount1);
-        console.log("tokenAmount : ", tokenAmount);
+        tokenAmount = AmountToMint(ratios, _position, amount0, amount1, liquidity);
         _mint(recipient, tokenAmount);
-
-        
-
+ 
         emit Deposit(recipient, tokenAmount, amount0, amount1);
     }
 
@@ -319,7 +327,7 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         int24 tickLower,
         int24 tickUpper
     ) internal view returns (SqrtRatios memory ratios){
-        (ratios.sqrtPriceX96, , , , , , ) = pool.slot0();
+        (ratios.sqrtPriceX96, ratios.tick, , , , , ) = pool.slot0();
         ratios.sqrtRatioAX96 = TickMath.getSqrtRatioAtTick(tickLower);
         ratios.sqrtRatioBX96 = TickMath.getSqrtRatioAtTick(tickUpper);
     }
@@ -338,7 +346,6 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
                 amount0,
                 amount1
         );
-        console.log("in contract_ test : ", liquidity);
 
         (mintamount0, mintamount1) = pool.mint(
             address(this),
@@ -358,13 +365,13 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         SqrtRatios memory ratios,
         PositionInfo memory _position,
         uint256 addAmount0,
-        uint256 addAmount1
+        uint256 addAmount1,
+        uint128 liquidity
     ) internal view returns (uint256 tokenAmount){
 
         uint256 _fee = fee;
-        (uint128 liquidity,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
 
-        
         (uint256 interest0, uint256 interest1) =
             _fee > 0 ? (FullMath.mulDiv(uint256(tokenOwed0) - protocolFee0, _fee, 1e6), FullMath.mulDiv(uint256(tokenOwed1) - protocolFee1, _fee, 1e6)) :
             (0, 0);
@@ -404,17 +411,15 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         bytes calldata data
     ) external override {
         address payer = abi.decode(data, (address));
-        console.log("in contract_ payer address : ", payer);
-        console.log("in contract_ amount0 : ", amount0);
-        console.log("in contract_ amount1 : ", amount1);
+        console.log("in contract_mintcallback payer address : ", payer);
+        console.log("in contract_mintcallback amount0 : ", amount0);
+        console.log("in contract_mintcallback amount1 : ", amount1);
         require(msg.sender == address(pool));
 
         if(payer == address(this)){
-            console.log("in contract_ case1 ");
             if(amount0 > 0) token0.transfer(msg.sender, amount0);
             if(amount1 > 0) token1.transfer(msg.sender, amount1);
         } else{
-            console.log("in contract_ case2 ");
             if(amount0 > 0) token0.transferFrom(payer, msg.sender, amount0);
             if(amount1 > 0) token1.transferFrom(payer, msg.sender, amount1);
         }

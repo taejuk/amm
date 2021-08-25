@@ -31,7 +31,7 @@ contract vaultFactory {
     ) external onlyOwner returns (address vault){
         //중복 방 지
         require(getVaults[_pool] == address(0));
-        vault = address(new myVault(address(this), _pool, fee, _rebalancer));
+        vault = address(new myVault(_pool, fee, _rebalancer));
         getVaults[_pool] = vault;
         emit vaultCreate(vault, fee);
     }
