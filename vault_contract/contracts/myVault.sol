@@ -6,7 +6,7 @@ import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/ERC20.sol";
 import "../libraries/IERC20.sol";
-import "../libraries/SafeERC20.sol";
+//import "../libraries/SafeERC20.sol";
 import "../libraries/SafeCast.sol";
 // import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolImmutables.sol';
 // import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
@@ -28,7 +28,7 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     //using SafeMath for uint128;
     using SafeMath for uint256;
     using SafeCast for uint256;
-    using SafeERC20 for IERC20;
+    //using SafeERC20 for IERC20;
     
     //tokensssss
     //uint8 public constant decimals = 18;
@@ -133,11 +133,14 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         if(_position.initialized){
             updatePosition(_position);
         }
-        tokenAmount = AmountToMint(ratios, _position, amount0Desired, amount1Desired);
+
+        (amount0, amount1) = addLiquidity(_position, ratios, amount0Desired, amount1Desired, recipient);
+
+        tokenAmount = AmountToMint(ratios, _position, amount0, amount1);
         console.log("tokenAmount : ", tokenAmount);
         _mint(recipient, tokenAmount);
 
-        (amount0, amount1) = addLiquidity(_position, ratios, amount0Desired, amount1Desired, recipient);
+        
 
         emit Deposit(recipient, tokenAmount, amount0, amount1);
     }
@@ -230,21 +233,27 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
             _position.tickLower = param.tickLower;
             _position.tickUpper = param.tickUpper;
             (amount0, amount1) = addLiquidity(_position, ratios, amount0, amount1, address(this));
-            position.initialized = true;
-            position.positionKey = PositionKey.compute(address(this), param.tickLower, param.tickUpper);
+            updatePositionInfo(param.tickLower, param.tickUpper);
         }
-        // else {
-        //     _position.tickLower = param.tickLower;
-        //     _position.tickUpper = param.tickUpper;
-        //     //addLiquidity(_position, ratios, 0, 0, address(this));
-        // }
-        
-        {
+        else {
             position.tickLower = param.tickLower;
             position.tickUpper = param.tickUpper;
-            //position.initialized = true;
-            //position.positionKey = PositionKey.compute(address(this), param.tickLower, param.tickUpper);
+            //addLiquidity(_position, ratios, 0, 0, address(this));
         }
+        
+        // {
+        //     position.tickLower = param.tickLower;
+        //     position.tickUpper = param.tickUpper;
+        //     position.initialized = true;
+        //     position.positionKey = PositionKey.compute(address(this), param.tickLower, param.tickUpper);
+        // }
+    }
+
+    function updatePositionInfo(int24 tickLower, int24 tickUpper) internal {
+        position.tickLower = tickLower;
+        position.tickUpper = tickUpper;
+        position.initialized = true;
+        position.positionKey = PositionKey.compute(address(this), tickLower, tickUpper);
     }
 
     
@@ -329,14 +338,20 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
                 amount0,
                 amount1
         );
+        console.log("in contract_ test : ", liquidity);
 
         (mintamount0, mintamount1) = pool.mint(
             address(this),
             _position.tickLower,
             _position.tickUpper,
             liquidity,
-            abi.encode(address(recipient))
+            abi.encode(recipient)
         );
+
+        console.log("in contract_ mint amount : ", mintamount0, mintamount1);
+
+        if(!_position.initialized)
+            updatePositionInfo(_position.tickLower, _position.tickUpper);
     }
 
     function AmountToMint(
@@ -389,14 +404,19 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         bytes calldata data
     ) external override {
         address payer = abi.decode(data, (address));
+        console.log("in contract_ payer address : ", payer);
+        console.log("in contract_ amount0 : ", amount0);
+        console.log("in contract_ amount1 : ", amount1);
         require(msg.sender == address(pool));
 
         if(payer == address(this)){
-            if(amount0 > 0) token0.safeTransfer(msg.sender, amount0);
-            if(amount1 > 0) token1.safeTransfer(msg.sender, amount1);
+            console.log("in contract_ case1 ");
+            if(amount0 > 0) token0.transfer(msg.sender, amount0);
+            if(amount1 > 0) token1.transfer(msg.sender, amount1);
         } else{
-            if(amount0 > 0) token0.safeTransferFrom(payer, msg.sender, amount0);
-            if(amount1 > 0) token1.safeTransferFrom(payer, msg.sender, amount1);
+            console.log("in contract_ case2 ");
+            if(amount0 > 0) token0.transferFrom(payer, msg.sender, amount0);
+            if(amount1 > 0) token1.transferFrom(payer, msg.sender, amount1);
         }
     }
     
@@ -411,9 +431,9 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
         (bool tokenToPay, uint256 amountToPay) = amount0Delta > 0 ? (true, uint256(amount0Delta)) : (false, uint256(amount1Delta));
         
         if(tokenToPay){
-            token0.safeTransfer(msg.sender, amountToPay);
+            token0.transfer(msg.sender, amountToPay);
         } else{
-            token1.safeTransfer(msg.sender, amountToPay);
+            token1.transfer(msg.sender, amountToPay);
         }
         
     }

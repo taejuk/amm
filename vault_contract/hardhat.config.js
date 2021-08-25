@@ -19,9 +19,12 @@ module.exports = {
       allowUnlimitedContractSize: true,
       forking: {
         url: "https://eth-mainnet.alchemyapi.io/v2/D73_ryQg6AXEruir7eSrcgqw0AgpArxc",
-        blockNumber: 13087010
+        blockNumber: 13093580
       }
     }
   },
   solidity: "0.7.6",
+  mocha: {
+    timeout: 200000
+  },
 };
