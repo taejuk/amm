@@ -247,6 +247,11 @@ describe("VaultFactory", function () {
       console.log("earn weth :", weth_after.sub(weth_before).toString());
       console.log("earn usdc :", usdc_after.sub(usdc_before).toString());
     });
+    it("get protocol Fee", async function(){
+      const fees = await vault.connect(addr2).getProtocolFees();
+      console.log("protocol Fee0:", fees[0].toString());
+      console.log("protocol Fee1:", fees[1].toString());
+    })
   });
 
 });

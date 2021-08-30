@@ -119,8 +119,6 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     
     /** 
     * @notice user가 vault에 예치할때 amount 비율 계산해서 토큰 받고 자체 발행 토큰 주고(mint) vault에 토큰 저장
-    * @dev payable????????????
-    * @dev msg.sender랑 recipient이 다를까?
     * @param amount0 amount of token 0 want to add
     * @param amount1 amount of token 1
     */
@@ -139,10 +137,6 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 
         SqrtRatios memory ratios = getRatios(_position.tickLower, _position.tickUpper);
 
-        //console.log("sqrtprice0", ratios.sqrtPriceX96);
-        //console.log("sqrtprice1", ratios.sqrtRatioAX96);
-        //console.log("sqrtprice2", ratios.sqrtRatioBX96);
-
         (uint128 liquidity,,,,) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
 
         (amount0, amount1) = addLiquidity(_position, ratios, amount0Desired, amount1Desired, recipient);
@@ -155,20 +149,20 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
 
     function withdraw(
         address recipient,
-        uint256 _token,
+        uint256 burnAmount,
         uint256 amount0min,
         uint256 amount1min
     )external lock returns (uint128 amount0, uint128 amount1){
-        require(balanceOf(recipient) >= _token, "not enough token");
-        require(_token < this.totalSupply(), "token value error");
-
-        uint256 token = _token;
+        //check amount of token recipient have
+        require(balanceOf(recipient) >= burnAmount, "not enough token");
+        require(burnAmount < this.totalSupply(), "token value error");
 
         PositionInfo memory _position = position;
         require(_position.tickUpper > _position.tickLower, "range unvailidate");
 
         // burn liquidity from position
-        (uint256 Amount0toCollect, uint256 Amount1toCollect) = _burnAstoken(_position, token);
+        (uint256 Amount0toCollect, uint256 Amount1toCollect) = _burnAstoken(_position, burnAmount);
+
         // collect burned liquidity and earned fee
         (amount0, amount1) = pool.collect(
             recipient,
@@ -177,11 +171,13 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
             SafeCast.toUint128(Amount0toCollect),
             SafeCast.toUint128(Amount1toCollect)
         );
+
         //r : rate, To : tokenowed after burn liquiditydelta, L : liquidity
         //(To - L(1-r))r
-        _burn(recipient, _token);
+        _burn(recipient, burnAmount);
 
         require(amount0 >= amount0min && amount1 >= amount1min, "withdraw slippage");
+        emit Withdraw(recipient, amount0, amount1);
     }
     struct RebalanceParams{
         int24 tickLower;
@@ -265,33 +261,30 @@ contract myVault is ERC20, IUniswapV3MintCallback, IUniswapV3SwapCallback
     
     function _burnAstoken(PositionInfo memory _position, uint256 tokenAmount) internal returns (uint256 amount0, uint256 amount1) {
         updatePosition(_position);
-        (uint128 liquidity,,,uint128 pretokenOwed0, uint128 pretokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
+        (uint128 liquidity,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
         uint256 liquidityDelta = FullMath.mulDiv(uint256(liquidity), tokenAmount, this.totalSupply());
-        console.log("in contract liquidity", liquidity);
-        console.log("in contract liquidityDelta", liquidityDelta);
-
         (amount0, amount1) = pool.burn(_position.tickLower, _position.tickUpper, SafeCast.toUint128(liquidityDelta));
-        (,,,uint128 tokenOwed0, uint128 tokenOwed1) = pool.positions(PositionKey.compute(address(this), _position.tickLower, _position.tickUpper));
-        uint256 pureInterest0 = uint256(tokenOwed0) - uint256(pretokenOwed0) - protocolFee0;
-        uint256 pureInterest1 = uint256(tokenOwed1) - uint256(pretokenOwed1) - protocolFee1;
 
-        (uint256 fee0, uint256 fee1) = _calcProtocolFee(pureInterest0, pureInterest1);
-        amount0 += fee0;
-        amount1 += fee1;
+        uint256 pureInterest0 = uint256(tokenOwed0) - protocolFee0;
+        uint256 pureInterest1 = uint256(tokenOwed1) - protocolFee1;
+        (uint256 calcedInterest0, uint256 calcedInterest1) = _calcProtocolFee(pureInterest0, pureInterest1);
+
+        amount0 += calcedInterest0;
+        amount1 += calcedInterest1;
     }
 
     function _calcProtocolFee(
         uint256 pureInterest0,
         uint256 pureInterest1
-    ) internal returns(uint256 amountfeeCollect0, uint256 amountfeeCollect1) {
+    ) internal returns(uint256 amountCollect0, uint256 amountCollect1) {
         uint256 protocolfee0 = FullMath.mulDiv(pureInterest0, fee, 1e6);
         uint256 protocolfee1 = FullMath.mulDiv(pureInterest1, fee, 1e6);
 
         protocolFee0 += protocolfee0;
         protocolFee1 += protocolfee1;
 
-        amountfeeCollect0 = pureInterest0 - protocolfee0;
-        amountfeeCollect1 = pureInterest1 - protocolfee1;
+        amountCollect0 = pureInterest0 - protocolfee0;
+        amountCollect1 = pureInterest1 - protocolfee1;
     }
 
     /**
